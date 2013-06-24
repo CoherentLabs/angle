@@ -17,7 +17,7 @@
 
 #if !defined(ANGLE_ENABLE_D3D11)
 // Enables use of the Direct3D 11 API for a default display, when available
-#define ANGLE_ENABLE_D3D11 0
+#define ANGLE_ENABLE_D3D11 1
 #endif
 
 namespace rx

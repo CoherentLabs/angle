@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #define WIN32_LEAN_AND_MEAN
 #include <d3d9.h>
+#include <d3d11.h>
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -10,15 +11,30 @@
 #define WIDTH 640
 #define HEIGHT 480
 
+enum DeviceType
+{
+	DT_Dx9,
+	DT_Dx9Ex,
+	DT_Dx11
+};
+
+static const DeviceType g_DeviceType = DT_Dx11;
+
 struct _Context {
 	~_Context() {
 		if(Device) Device->Release();
 		if(D3D) D3D->Release();
+		if(Context11) Context11->Release();
+		if(Device11) Device11->Release();
+
+		if(D3DModule) ::FreeLibrary(D3DModule);
 	}
 	HWND hWnd;
 	HMODULE D3DModule;
 	IDirect3D9* D3D;
 	IDirect3DDevice9* Device;
+	ID3D11Device* Device11;
+	ID3D11DeviceContext* Context11;
 
 	EGLDisplay Display;
 	EGLSurface Surface;
@@ -273,12 +289,24 @@ void WinLoop ()
    }
 }
 
-bool InitializeDirectX(){
+bool InitializeDirectX9() {
 	g_Context.D3DModule = LoadLibrary("d3d9.dll");
 	if(!g_Context.D3DModule) 
 		return false;
 
-	g_Context.D3D = ::Direct3DCreate9(D3D_SDK_VERSION);
+	typedef HRESULT (WINAPI *Direct3DCreate9ExFunc)(UINT, IDirect3D9Ex**);
+	Direct3DCreate9ExFunc Direct3DCreate9ExPtr = reinterpret_cast<Direct3DCreate9ExFunc>(GetProcAddress(g_Context.D3DModule, "Direct3DCreate9Ex"));
+
+	if(g_DeviceType == DT_Dx9Ex)
+	{
+		IDirect3D9Ex* d3d9ex = NULL;
+		Direct3DCreate9ExPtr(D3D_SDK_VERSION, &d3d9ex);
+		g_Context.D3D = d3d9ex;
+	}
+	else
+	{
+		g_Context.D3D = ::Direct3DCreate9(D3D_SDK_VERSION);
+	}
 	if(!g_Context.D3D)
 		return false;
 
@@ -295,13 +323,31 @@ bool InitializeDirectX(){
 	presentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
-	HRESULT hr = g_Context.D3D->CreateDevice(
-					D3DADAPTER_DEFAULT
-					, D3DDEVTYPE_HAL
-					, window
-					, D3DCREATE_FPU_PRESERVE | D3DCREATE_HARDWARE_VERTEXPROCESSING
-					, &presentParams
-					, &g_Context.Device);
+	HRESULT hr = S_OK;
+
+	if(g_DeviceType == DT_Dx9Ex)
+	{
+		IDirect3DDevice9Ex* deviceEx = NULL;
+		hr = static_cast<IDirect3D9Ex*>(g_Context.D3D)->CreateDeviceEx(
+						D3DADAPTER_DEFAULT
+						, D3DDEVTYPE_HAL
+						, window
+						, D3DCREATE_FPU_PRESERVE | D3DCREATE_HARDWARE_VERTEXPROCESSING
+						, &presentParams
+						, NULL
+						, &deviceEx);
+		g_Context.Device = deviceEx;
+	}
+	else
+	{
+		hr = g_Context.D3D->CreateDevice(
+						D3DADAPTER_DEFAULT
+						, D3DDEVTYPE_HAL
+						, window
+						, D3DCREATE_FPU_PRESERVE | D3DCREATE_HARDWARE_VERTEXPROCESSING
+						, &presentParams
+						, &g_Context.Device);
+	}
 
 	if(FAILED(hr))
 		return false;
@@ -309,9 +355,58 @@ bool InitializeDirectX(){
 	return true;
 }
 
+bool InitializeDirectX11() {
+	g_Context.D3DModule = LoadLibrary("d3d11.dll");
+	if(!g_Context.D3DModule) 
+		return false;
+
+	PFN_D3D11_CREATE_DEVICE D3D11CreateDevice = (PFN_D3D11_CREATE_DEVICE)GetProcAddress(g_Context.D3DModule, "D3D11CreateDevice");
+	if(!D3D11CreateDevice)
+		return false;
+
+	D3D_FEATURE_LEVEL featureLevels[] =
+    {
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+    };
+
+	D3D_FEATURE_LEVEL resultFl;
+	DWORD flags = 0;
+	#ifdef _DEBUG
+	flags |= D3D11_CREATE_DEVICE_DEBUG;
+	#endif
+	HRESULT result = D3D11CreateDevice(NULL,
+						D3D_DRIVER_TYPE_HARDWARE,
+						NULL,
+						flags,
+						featureLevels,
+						sizeof(featureLevels) / sizeof(D3D_FEATURE_LEVEL),
+						D3D11_SDK_VERSION,
+						&g_Context.Device11,
+						&resultFl,
+						&g_Context.Context11);
+	
+	return SUCCEEDED(result);
+}
+
 bool InitializeGLES() {
 	g_Context.eglGetDisplayANGLE = (PFNEGLGETDISPLAYANGLE) eglGetProcAddress("eglGetDisplayANGLE");
-	g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9_DISPLAY_DEVICE, g_Context.Device);
+	
+	switch(g_DeviceType)
+	{
+	case DT_Dx9:
+		g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9_DISPLAY_DEVICE, g_Context.Device);
+		break;
+	case DT_Dx9Ex:
+		g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9EX_DISPLAY_DEVICE, g_Context.Device);
+		break;
+	case DT_Dx11:
+		g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D11_DISPLAY_DEVICE, g_Context.Device11);
+		break;
+	default:
+		return false;
+	};
 	
 	if(!eglInitialize(g_Context.Display, NULL, NULL))
 	   return false;
@@ -379,16 +474,27 @@ int main ( int argc, char *argv[] )
 	if(!g_Context.hWnd)
 		return 1;
 
-	if(!InitializeDirectX())
-		return 2;
+	if(g_DeviceType == DT_Dx11)
+	{
+		if(!InitializeDirectX11())
+			return 2;
+	}
+	else
+	{
+		if(!InitializeDirectX9())
+			return 2;
+	}
 
 	if(!InitializeGLES())
 		return 3;
 
 	if(!Init())
-		return false;
+		return 4;
 
 	WinLoop();
+
+	if(!eglTerminate(g_Context.Display))
+		return 5;
 
 	return 0;   
 }
