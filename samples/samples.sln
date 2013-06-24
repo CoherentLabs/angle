@@ -38,6 +38,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simple_Instancing", "angle\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultipleRenderTargets", "gles2_book\MultipleRenderTargets\MultipleRenderTargets.vcxproj", "{DD670DCB-2554-4FAE-B7C9-D7F0C3087C10}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hello_Triangle_ExtDevice", "gles2_book\Hello_Triangle_ExtDevice\Hello_Triangle_ExtDevice.vcxproj", "{293F1137-28FA-4FB6-AA00-631CC9101FAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -170,6 +172,12 @@ Global
 		{DD670DCB-2554-4FAE-B7C9-D7F0C3087C10}.Release|Win32.ActiveCfg = Release|Win32
 		{DD670DCB-2554-4FAE-B7C9-D7F0C3087C10}.Release|Win32.Build.0 = Release|Win32
 		{DD670DCB-2554-4FAE-B7C9-D7F0C3087C10}.Release|x64.ActiveCfg = Release|Win32
+		{293F1137-28FA-4FB6-AA00-631CC9101FAB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{293F1137-28FA-4FB6-AA00-631CC9101FAB}.Debug|Win32.Build.0 = Debug|Win32
+		{293F1137-28FA-4FB6-AA00-631CC9101FAB}.Debug|x64.ActiveCfg = Debug|Win32
+		{293F1137-28FA-4FB6-AA00-631CC9101FAB}.Release|Win32.ActiveCfg = Release|Win32
+		{293F1137-28FA-4FB6-AA00-631CC9101FAB}.Release|Win32.Build.0 = Release|Win32
+		{293F1137-28FA-4FB6-AA00-631CC9101FAB}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
