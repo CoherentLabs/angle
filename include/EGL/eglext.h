@@ -347,6 +347,19 @@ typedef EGLuint64NV (EGLAPIENTRYP PFNEGLGETSYSTEMTIMENVPROC) (void);
 #define EGL_LOSE_CONTEXT_ON_RESET_EXT		0x31BF
 #endif
 
+#ifndef EGL_ANGLE_direct3d_device_existing
+#define EGL_ANGLE_direct3d_device_existing 1
+#define EGL_ANGLE_NONE_DISPLAY_DEVICE 0
+#define EGL_ANGLE_D3D9_DISPLAY_DEVICE 1
+#define EGL_ANGLE_D3D9EX_DISPLAY_DEVICE 2
+#define EGL_ANGLE_D3D11_DISPLAY_DEVICE 3
+#ifdef EGL_EGLEXT_PROTOTYPES
+EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplayANGLE(EGLint type, void* device);
+#else
+typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETDISPLAYANGLE)(EGLint, void*);
+#endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif

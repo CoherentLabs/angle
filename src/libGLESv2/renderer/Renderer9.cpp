@@ -80,7 +80,24 @@ enum
 
 Renderer9::Renderer9(egl::Display *display, HDC hDc, bool softwareDevice) : Renderer(display), mDc(hDc), mSoftwareDevice(softwareDevice)
 {
-    mD3d9Module = NULL;
+	nullAll();
+}
+
+Renderer9::Renderer9(egl::Display *display, EGLint type, void* device) : Renderer(display), mDc(NULL), mSoftwareDevice(false)
+{
+	nullAll();
+	mClientDeviceType = type;
+	mClientDevice = device;
+
+	// get the adapter bound to the client device
+	D3DDEVICE_CREATION_PARAMETERS creationParams;
+	static_cast<IDirect3DDevice9*>(mClientDevice)->GetCreationParameters(&creationParams);
+	mAdapter = creationParams.AdapterOrdinal;
+}
+
+void Renderer9::nullAll()
+{
+	mD3d9Module = NULL;
 
     mD3d9 = NULL;
     mD3d9Ex = NULL;
@@ -115,6 +132,9 @@ Renderer9::Renderer9(egl::Display *display, HDC hDc, bool softwareDevice) : Rend
         mNullColorbufferCache[i].height = 0;
         mNullColorbufferCache[i].buffer = NULL;
     }
+
+	mClientDeviceType = EGL_ANGLE_NONE_DISPLAY_DEVICE;
+	mClientDevice = NULL;
 }
 
 Renderer9::~Renderer9()
@@ -182,48 +202,65 @@ EGLint Renderer9::initialize()
         return EGL_NOT_INITIALIZED;
     }
 
-    if (mSoftwareDevice)
-    {
-        mD3d9Module = GetModuleHandle(TEXT("swiftshader_d3d9.dll"));
-    }
-    else
-    {
-        mD3d9Module = GetModuleHandle(TEXT("d3d9.dll"));
-    }
+	if(!mClientDevice)
+	{
+		if (mSoftwareDevice)
+		{
+		    mD3d9Module = GetModuleHandle(TEXT("swiftshader_d3d9.dll"));
+		}
+		else
+		{
+		    mD3d9Module = GetModuleHandle(TEXT("d3d9.dll"));
+		}
 
-    if (mD3d9Module == NULL)
-    {
-        ERR("No D3D9 module found - aborting!\n");
-        return EGL_NOT_INITIALIZED;
-    }
+		if (mD3d9Module == NULL)
+		{
+		    ERR("No D3D9 module found - aborting!\n");
+		    return EGL_NOT_INITIALIZED;
+		}
 
-    typedef HRESULT (WINAPI *Direct3DCreate9ExFunc)(UINT, IDirect3D9Ex**);
-    Direct3DCreate9ExFunc Direct3DCreate9ExPtr = reinterpret_cast<Direct3DCreate9ExFunc>(GetProcAddress(mD3d9Module, "Direct3DCreate9Ex"));
+		typedef HRESULT (WINAPI *Direct3DCreate9ExFunc)(UINT, IDirect3D9Ex**);
+		Direct3DCreate9ExFunc Direct3DCreate9ExPtr = reinterpret_cast<Direct3DCreate9ExFunc>(GetProcAddress(mD3d9Module, "Direct3DCreate9Ex"));
 
-    // Use Direct3D9Ex if available. Among other things, this version is less
-    // inclined to report a lost context, for example when the user switches
-    // desktop. Direct3D9Ex is available in Windows Vista and later if suitable drivers are available.
-    if (ANGLE_ENABLE_D3D9EX && Direct3DCreate9ExPtr && SUCCEEDED(Direct3DCreate9ExPtr(D3D_SDK_VERSION, &mD3d9Ex)))
-    {
-        ASSERT(mD3d9Ex);
-        mD3d9Ex->QueryInterface(IID_IDirect3D9, reinterpret_cast<void**>(&mD3d9));
-        ASSERT(mD3d9);
-    }
-    else
-    {
-        mD3d9 = Direct3DCreate9(D3D_SDK_VERSION);
-    }
+		// Use Direct3D9Ex if available. Among other things, this version is less
+		// inclined to report a lost context, for example when the user switches
+		// desktop. Direct3D9Ex is available in Windows Vista and later if suitable drivers are available.
+		if (ANGLE_ENABLE_D3D9EX && Direct3DCreate9ExPtr && SUCCEEDED(Direct3DCreate9ExPtr(D3D_SDK_VERSION, &mD3d9Ex)))
+		{
+		    ASSERT(mD3d9Ex);
+		    mD3d9Ex->QueryInterface(IID_IDirect3D9, reinterpret_cast<void**>(&mD3d9));
+		    ASSERT(mD3d9);
+		}
+		else
+		{
+		    mD3d9 = Direct3DCreate9(D3D_SDK_VERSION);
+		}
 
-    if (!mD3d9)
-    {
-        ERR("Could not create D3D9 device - aborting!\n");
-        return EGL_NOT_INITIALIZED;
-    }
+		if (!mD3d9)
+		{
+		    ERR("Could not create D3D9 device - aborting!\n");
+		    return EGL_NOT_INITIALIZED;
+		}
 
-    if (mDc != NULL)
-    {
-    //  UNIMPLEMENTED();   // FIXME: Determine which adapter index the device context corresponds to
-    }
+		if (mDc != NULL)
+		{
+		//  UNIMPLEMENTED();   // FIXME: Determine which adapter index the device context corresponds to
+		}
+	}
+	else
+	{
+		// Get the D3D9 object from the client device and use it from now on
+		if(FAILED(static_cast<IDirect3DDevice9*>(mClientDevice)->GetDirect3D(&mD3d9)))
+		{
+			return EGL_NOT_INITIALIZED;
+		}
+
+		if(mClientDeviceType == EGL_ANGLE_D3D9EX_DISPLAY_DEVICE && ANGLE_ENABLE_D3D9EX)
+		{
+			mD3d9Ex = static_cast<IDirect3D9Ex*>(mD3d9);
+			mD3d9Ex->AddRef();
+		}
+	}
 
     HRESULT result;
 
@@ -336,37 +373,49 @@ EGLint Renderer9::initialize()
 
     mMaxSupportedSamples = max;
 
-    static const TCHAR windowName[] = TEXT("AngleHiddenWindow");
-    static const TCHAR className[] = TEXT("STATIC");
+	if(!mClientDevice)
+	{
+		static const TCHAR windowName[] = TEXT("AngleHiddenWindow");
+		static const TCHAR className[] = TEXT("STATIC");
 
-    mDeviceWindow = CreateWindowEx(WS_EX_NOACTIVATE, className, windowName, WS_DISABLED | WS_POPUP, 0, 0, 1, 1, HWND_MESSAGE, NULL, GetModuleHandle(NULL), NULL);
+		mDeviceWindow = CreateWindowEx(WS_EX_NOACTIVATE, className, windowName, WS_DISABLED | WS_POPUP, 0, 0, 1, 1, HWND_MESSAGE, NULL, GetModuleHandle(NULL), NULL);
 
-    D3DPRESENT_PARAMETERS presentParameters = getDefaultPresentParameters();
-    DWORD behaviorFlags = D3DCREATE_FPU_PRESERVE | D3DCREATE_NOWINDOWCHANGES;
+		D3DPRESENT_PARAMETERS presentParameters = getDefaultPresentParameters();
+		DWORD behaviorFlags = D3DCREATE_FPU_PRESERVE | D3DCREATE_NOWINDOWCHANGES;
 
-    result = mD3d9->CreateDevice(mAdapter, mDeviceType, mDeviceWindow, behaviorFlags | D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &presentParameters, &mDevice);
-    if (result == D3DERR_OUTOFVIDEOMEMORY || result == E_OUTOFMEMORY || result == D3DERR_DEVICELOST)
-    {
-        return EGL_BAD_ALLOC;
-    }
+		result = mD3d9->CreateDevice(mAdapter, mDeviceType, mDeviceWindow, behaviorFlags | D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &presentParameters, &mDevice);
+		if (result == D3DERR_OUTOFVIDEOMEMORY || result == E_OUTOFMEMORY || result == D3DERR_DEVICELOST)
+		{
+		    return EGL_BAD_ALLOC;
+		}
 
-    if (FAILED(result))
-    {
-        result = mD3d9->CreateDevice(mAdapter, mDeviceType, mDeviceWindow, behaviorFlags | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParameters, &mDevice);
+		if (FAILED(result))
+		{
+		    result = mD3d9->CreateDevice(mAdapter, mDeviceType, mDeviceWindow, behaviorFlags | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParameters, &mDevice);
 
-        if (FAILED(result))
-        {
-            ASSERT(result == D3DERR_OUTOFVIDEOMEMORY || result == E_OUTOFMEMORY || result == D3DERR_NOTAVAILABLE || result == D3DERR_DEVICELOST);
-            return EGL_BAD_ALLOC;
-        }
-    }
+		    if (FAILED(result))
+		    {
+		        ASSERT(result == D3DERR_OUTOFVIDEOMEMORY || result == E_OUTOFMEMORY || result == D3DERR_NOTAVAILABLE || result == D3DERR_DEVICELOST);
+		        return EGL_BAD_ALLOC;
+		    }
+		}
 
-    if (mD3d9Ex)
-    {
-        result = mDevice->QueryInterface(IID_IDirect3DDevice9Ex, (void**) &mDeviceEx);
-        ASSERT(SUCCEEDED(result));
-    }
-
+		if (mD3d9Ex)
+		{
+		    result = mDevice->QueryInterface(IID_IDirect3DDevice9Ex, (void**) &mDeviceEx);
+		    ASSERT(SUCCEEDED(result));
+		}
+	}
+	else
+	{
+		mDevice = static_cast<IDirect3DDevice9*>(mClientDevice);
+		mDevice->AddRef();
+		if(mClientDeviceType == EGL_ANGLE_D3D9EX_DISPLAY_DEVICE && ANGLE_ENABLE_D3D9EX)
+		{
+			mDeviceEx = static_cast<IDirect3DDevice9Ex*>(mClientDevice);
+			mDeviceEx->AddRef();
+		}
+	}
     mVertexShaderCache.initialize(mDevice);
     mPixelShaderCache.initialize(mDevice);
 

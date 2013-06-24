@@ -212,6 +212,37 @@ rx::Renderer *glCreateRenderer(egl::Display *display, HDC hDc, EGLNativeDisplayT
     return NULL;
 }
 
+rx::Renderer *glCreateRendererFromDevice(egl::Display *display, EGLint type, void* device)
+{
+    rx::Renderer *renderer = NULL;
+    EGLint status = EGL_BAD_ALLOC;
+
+	if(type == EGL_ANGLE_D3D11_DISPLAY_DEVICE)
+	{
+		if(!ANGLE_ENABLE_D3D11)
+		{
+			return NULL;
+		}
+        renderer = new rx::Renderer11(display, device);
+	}
+	else
+	{
+		renderer = new rx::Renderer9(display, type, device);
+	}
+
+	if (renderer)
+    {
+        status = renderer->initialize();
+    }
+
+    if (status == EGL_SUCCESS)
+    {
+        return renderer;
+    }
+
+	return NULL;
+}
+
 void glDestroyRenderer(rx::Renderer *renderer)
 {
     delete renderer;

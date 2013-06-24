@@ -32,6 +32,7 @@ class Renderer9 : public Renderer
 {
   public:
     Renderer9(egl::Display *display, HDC hDc, bool softwareDevice);
+    Renderer9(egl::Display *display, EGLint type, void* device);
     virtual ~Renderer9();
 
     static Renderer9 *makeRenderer9(Renderer *renderer);
@@ -198,6 +199,8 @@ class Renderer9 : public Renderer
   private:
     DISALLOW_COPY_AND_ASSIGN(Renderer9);
 
+	void nullAll();
+
     void applyUniformnfv(gl::Uniform *targetUniform, const GLfloat *v);
     void applyUniformniv(gl::Uniform *targetUniform, const GLint *v);
     void applyUniformnbv(gl::Uniform *targetUniform, const GLint *v);
@@ -225,6 +228,9 @@ class Renderer9 : public Renderer
     IDirect3D9Ex *mD3d9Ex;  // Might be null if D3D9Ex is not supported.
     IDirect3DDevice9 *mDevice;
     IDirect3DDevice9Ex *mDeviceEx;  // Might be null if D3D9Ex is not supported.
+
+	EGLint mClientDeviceType;
+	void* mClientDevice;
 
     Blit *mBlit;
 

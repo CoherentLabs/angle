@@ -1148,6 +1148,20 @@ EGLBoolean __stdcall eglPostSubBufferNV(EGLDisplay dpy, EGLSurface surface, EGLi
     return EGL_FALSE;
 }
 
+EGLDisplay __stdcall eglGetDisplayANGLE(EGLint type, void* device)
+{
+    EVENT("(EGLint display_id = 0x%0.8p)", type);
+
+    try
+    {
+        return egl::Display::getDisplay(type, device);
+    }
+    catch(std::bad_alloc&)
+    {
+        return egl::error(EGL_BAD_ALLOC, EGL_NO_DISPLAY);
+    }
+}
+
 __eglMustCastToProperFunctionPointerType __stdcall eglGetProcAddress(const char *procname)
 {
     EVENT("(const char *procname = \"%s\")", procname);
@@ -1164,6 +1178,7 @@ __eglMustCastToProperFunctionPointerType __stdcall eglGetProcAddress(const char 
         {
             {"eglQuerySurfacePointerANGLE", (__eglMustCastToProperFunctionPointerType)eglQuerySurfacePointerANGLE},
             {"eglPostSubBufferNV", (__eglMustCastToProperFunctionPointerType)eglPostSubBufferNV},
+			{"eglGetDisplayANGLE", (__eglMustCastToProperFunctionPointerType)eglGetDisplayANGLE},
             {"", NULL},
         };
 

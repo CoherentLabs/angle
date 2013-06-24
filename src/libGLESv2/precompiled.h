@@ -12,6 +12,7 @@
 
 #define EGLAPI
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <assert.h>
 #include <cstddef>

@@ -68,7 +68,18 @@ enum
 
 Renderer11::Renderer11(egl::Display *display, HDC hDc) : Renderer(display), mDc(hDc)
 {
-    mVertexDataManager = NULL;
+	nullAll();
+}
+
+Renderer11::Renderer11(egl::Display *display, void* device) : Renderer(display), mDc(NULL)
+{
+    nullAll();
+	mClientDevice = static_cast<ID3D11Device*>(device);
+}
+
+void Renderer11::nullAll()
+{
+	mVertexDataManager = NULL;
     mIndexDataManager = NULL;
 
     mLineLoopIB = NULL;
@@ -137,71 +148,81 @@ EGLint Renderer11::initialize()
         return EGL_NOT_INITIALIZED;
     }
 
-    mDxgiModule = LoadLibrary(TEXT("dxgi.dll"));
-    mD3d11Module = LoadLibrary(TEXT("d3d11.dll"));
-
-    if (mD3d11Module == NULL || mDxgiModule == NULL)
-    {
-        ERR("Could not load D3D11 or DXGI library - aborting!\n");
-        return EGL_NOT_INITIALIZED;
-    }
-
-    // create the D3D11 device
-    ASSERT(mDevice == NULL);
-    PFN_D3D11_CREATE_DEVICE D3D11CreateDevice = (PFN_D3D11_CREATE_DEVICE)GetProcAddress(mD3d11Module, "D3D11CreateDevice");
-
-    if (D3D11CreateDevice == NULL)
-    {
-        ERR("Could not retrieve D3D11CreateDevice address - aborting!\n");
-        return EGL_NOT_INITIALIZED;
-    }
-
-    D3D_FEATURE_LEVEL featureLevels[] =
-    {
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0,
-    };
-
     HRESULT result = S_OK;
+	if(!mClientDevice)
+	{
+	    mDxgiModule = LoadLibrary(TEXT("dxgi.dll"));
+	    mD3d11Module = LoadLibrary(TEXT("d3d11.dll"));
+	
+	    if (mD3d11Module == NULL || mDxgiModule == NULL)
+	    {
+	        ERR("Could not load D3D11 or DXGI library - aborting!\n");
+	        return EGL_NOT_INITIALIZED;
+	    }
+	
+	    // create the D3D11 device
+	    ASSERT(mDevice == NULL);
+	    PFN_D3D11_CREATE_DEVICE D3D11CreateDevice = (PFN_D3D11_CREATE_DEVICE)GetProcAddress(mD3d11Module, "D3D11CreateDevice");
+	
+	    if (D3D11CreateDevice == NULL)
+	    {
+	        ERR("Could not retrieve D3D11CreateDevice address - aborting!\n");
+	        return EGL_NOT_INITIALIZED;
+	    }
+	
+	    D3D_FEATURE_LEVEL featureLevels[] =
+	    {
+	        D3D_FEATURE_LEVEL_11_0,
+	        D3D_FEATURE_LEVEL_10_1,
+	        D3D_FEATURE_LEVEL_10_0,
+	    };
+		
+	#ifdef _DEBUG
+	    result = D3D11CreateDevice(NULL,
+	                               D3D_DRIVER_TYPE_HARDWARE,
+	                               NULL,
+	                               D3D11_CREATE_DEVICE_DEBUG,
+	                               featureLevels,
+	                               ArraySize(featureLevels),
+	                               D3D11_SDK_VERSION,
+	                               &mDevice,
+	                               &mFeatureLevel,
+	                               &mDeviceContext);
+	
+	    if (!mDevice || FAILED(result))
+	    {
+	        ERR("Failed creating Debug D3D11 device - falling back to release runtime.\n");
+	    }
+	
+	    if (!mDevice || FAILED(result))
+	#endif
+	    {
+	        result = D3D11CreateDevice(NULL,
+	                                   D3D_DRIVER_TYPE_HARDWARE,
+	                                   NULL,
+	                                   0,
+	                                   featureLevels,
+	                                   ArraySize(featureLevels),
+	                                   D3D11_SDK_VERSION,
+	                                   &mDevice,
+	                                   &mFeatureLevel,
+	                                   &mDeviceContext);
+	
+	        if (!mDevice || FAILED(result))
+	        {
+	            ERR("Could not create D3D11 device - aborting!\n");
+	            return EGL_NOT_INITIALIZED;   // Cleanup done by destructor through glDestroyRenderer
+	        }
+	    }
+	}
+	else
+	{
+		mDevice = mClientDevice;
+		mDevice->AddRef();
 
-#ifdef _DEBUG
-    result = D3D11CreateDevice(NULL,
-                               D3D_DRIVER_TYPE_HARDWARE,
-                               NULL,
-                               D3D11_CREATE_DEVICE_DEBUG,
-                               featureLevels,
-                               ArraySize(featureLevels),
-                               D3D11_SDK_VERSION,
-                               &mDevice,
-                               &mFeatureLevel,
-                               &mDeviceContext);
-
-    if (!mDevice || FAILED(result))
-    {
-        ERR("Failed creating Debug D3D11 device - falling back to release runtime.\n");
-    }
-
-    if (!mDevice || FAILED(result))
-#endif
-    {
-        result = D3D11CreateDevice(NULL,
-                                   D3D_DRIVER_TYPE_HARDWARE,
-                                   NULL,
-                                   0,
-                                   featureLevels,
-                                   ArraySize(featureLevels),
-                                   D3D11_SDK_VERSION,
-                                   &mDevice,
-                                   &mFeatureLevel,
-                                   &mDeviceContext);
-
-        if (!mDevice || FAILED(result))
-        {
-            ERR("Could not create D3D11 device - aborting!\n");
-            return EGL_NOT_INITIALIZED;   // Cleanup done by destructor through glDestroyRenderer
-        }
-    }
+		mFeatureLevel = mDevice->GetFeatureLevel();
+		mDevice->GetImmediateContext(&mDeviceContext);
+	}
 
     IDXGIDevice *dxgiDevice = NULL;
     result = mDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);

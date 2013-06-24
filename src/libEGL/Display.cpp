@@ -46,10 +46,34 @@ egl::Display *Display::getDisplay(EGLNativeDisplayType displayId)
     return display;
 }
 
+egl::Display *Display::getDisplay(EGLint type, void* device)
+{
+	if (displays.find((EGLNativeDisplayType)device) != displays.end())
+    {
+        return displays[(EGLNativeDisplayType)device];
+    }
+    
+    egl::Display *display = new egl::Display(type, device);
+
+    displays[(EGLNativeDisplayType)device] = display;
+    return display;
+}
+
 Display::Display(EGLNativeDisplayType displayId, HDC deviceContext) : mDc(deviceContext)
+																	, mClientDeviceType(EGL_ANGLE_NONE_DISPLAY_DEVICE) 
+																	, mClientDevice(nullptr)
 {
     mDisplayId = displayId;
     mRenderer = NULL;
+}
+
+Display::Display(EGLint type, void* device)
+	: mClientDeviceType(type)
+	, mClientDevice(device)
+	, mDc(NULL)
+{
+	mDisplayId = (EGLNativeDisplayType)mClientDevice;
+	mRenderer = NULL;
 }
 
 Display::~Display()
@@ -71,7 +95,14 @@ bool Display::initialize()
         return true;
     }
 
-    mRenderer = glCreateRenderer(this, mDc, mDisplayId);
+    if(!mClientDevice)
+	{
+		mRenderer = glCreateRenderer(this, mDc, mDisplayId);
+	}
+	else
+	{
+		mRenderer = glCreateRendererFromDevice(this, mClientDeviceType, mClientDevice);
+	}
     
     if (!mRenderer)
     {
@@ -497,11 +528,13 @@ void Display::initExtensionString()
         mExtensionString += "EGL_ANGLE_surface_d3d_texture_2d_share_handle ";
     }
 
+	mExtensionString += "EGL_ANGLE_direct3d_device_existing ";
+	
     if (mRenderer->getPostSubBufferSupport())
     {
         mExtensionString += "EGL_NV_post_sub_buffer";
     }
-
+	
     std::string::size_type end = mExtensionString.find_last_not_of(' ');
     if (end != std::string::npos)
     {

@@ -183,3 +183,4 @@ EXPORTS
     glBindTexImage                  @158 NONAME
     glCreateRenderer                @177 NONAME
     glDestroyRenderer               @178 NONAME
+    glCreateRendererFromDevice      @180 NONAME

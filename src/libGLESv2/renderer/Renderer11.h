@@ -40,6 +40,7 @@ class Renderer11 : public Renderer
 {
   public:
     Renderer11(egl::Display *display, HDC hDc);
+	Renderer11(egl::Display *display, void* device);
     virtual ~Renderer11();
 
     static Renderer11 *makeRenderer11(Renderer *renderer);
@@ -187,6 +188,7 @@ class Renderer11 : public Renderer
   private:
     DISALLOW_COPY_AND_ASSIGN(Renderer11);
 
+	void nullAll();
     void drawLineLoop(GLsizei count, GLenum type, const GLvoid *indices, int minIndex, gl::Buffer *elementArrayBuffer);
     void drawTriangleFan(GLsizei count, GLenum type, const GLvoid *indices, int minIndex, gl::Buffer *elementArrayBuffer, int instances);
 
@@ -342,6 +344,8 @@ class Renderer11 : public Renderer
     DXGI_ADAPTER_DESC mAdapterDescription;
     char mDescription[128];
     IDXGIFactory *mDxgiFactory;
+
+	ID3D11Device *mClientDevice;
 
     // Cached device caps
     bool mBGRATextureSupport;
