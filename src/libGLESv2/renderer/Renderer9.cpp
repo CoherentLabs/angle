@@ -135,11 +135,27 @@ void Renderer9::nullAll()
 
 	mClientDeviceType = EGL_ANGLE_NONE_DISPLAY_DEVICE;
 	mClientDevice = NULL;
+
+	mIsStateSet = false;
+	mForeignState = false;
+	mLocalState = false;
 }
 
 Renderer9::~Renderer9()
 {
     releaseDeviceResources();
+
+	if (mClientDevice)
+	{
+		if (mForeignState)
+		{
+			mForeignState->Release();
+		}
+		if (mLocalState)
+		{
+			mLocalState->Release();
+		}
+	}
 
     if (mDevice)
     {
@@ -3248,6 +3264,38 @@ bool Renderer9::getLUID(LUID *adapterLuid) const
     }
 
     return false;
+}
+
+void Renderer9::beginRendering()
+{
+	if(!mClientDevice)
+		return;
+
+	if(!mForeignState)
+	{
+		mDevice->CreateStateBlock(D3DSBT_ALL, &mForeignState);
+	}
+	if(!mLocalState)
+	{
+		mDevice->CreateStateBlock(D3DSBT_ALL, &mLocalState);
+		mLocalState->Capture();
+	}
+
+	mForeignState->Capture();
+	mLocalState->Apply();
+	mIsStateSet = true;
+}
+
+void Renderer9::endRendering()
+{
+	if(!mClientDevice)
+		return;
+
+	ASSERT(mIsStateSet);
+
+	mLocalState->Capture();
+	mForeignState->Apply();
+	mIsStateSet = false;
 }
 
 }

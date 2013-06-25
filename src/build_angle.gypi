@@ -272,6 +272,8 @@
             'libGLESv2/renderer/BufferStorage9.h',
             'libGLESv2/renderer/BufferStorage11.cpp',
             'libGLESv2/renderer/BufferStorage11.h',
+            'libGLESv2/renderer/Dx11State.cpp',
+            'libGLESv2/renderer/Dx11State.h',
             'libGLESv2/renderer/FenceImpl.h',
             'libGLESv2/renderer/Fence9.cpp',
             'libGLESv2/renderer/Fence9.h',

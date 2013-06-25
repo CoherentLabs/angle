@@ -1957,6 +1957,9 @@ void Renderer11::release()
         mDxgiAdapter = NULL;
     }
 
+	mForeignState.Release();
+	mLocalState.Release();
+
     if (mDeviceContext)
     {
         mDeviceContext->ClearState();
@@ -3530,6 +3533,18 @@ bool Renderer11::getLUID(LUID *adapterLuid) const
 
     *adapterLuid = adapterDesc.AdapterLuid;
     return true;
+}
+
+void Renderer11::beginRendering()
+{
+	mForeignState.Capture(mDeviceContext);
+	mLocalState.Apply(mDeviceContext);
+}
+
+void Renderer11::endRendering()
+{
+	mLocalState.Capture(mDeviceContext);
+	mForeignState.Apply(mDeviceContext);
 }
 
 }

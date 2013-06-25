@@ -17,6 +17,7 @@
 #include "libGLESv2/renderer/RenderStateCache.h"
 #include "libGLESv2/renderer/InputLayoutCache.h"
 #include "libGLESv2/renderer/RenderTarget.h"
+#include "libGLESv2/renderer/Dx11State.h"
 
 namespace gl
 {
@@ -185,6 +186,9 @@ class Renderer11 : public Renderer
 
     virtual bool getLUID(LUID *adapterLuid) const;
 
+	virtual void beginRendering();
+	virtual void endRendering();
+
   private:
     DISALLOW_COPY_AND_ASSIGN(Renderer11);
 
@@ -346,6 +350,8 @@ class Renderer11 : public Renderer
     IDXGIFactory *mDxgiFactory;
 
 	ID3D11Device *mClientDevice;
+	DX11State mForeignState;
+	DX11State mLocalState;
 
     // Cached device caps
     bool mBGRATextureSupport;

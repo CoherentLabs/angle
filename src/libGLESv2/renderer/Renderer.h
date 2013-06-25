@@ -227,6 +227,10 @@ class Renderer
 
     virtual bool getLUID(LUID *adapterLuid) const = 0;
 
+	// allow saving/restoring the scope of client devices
+	virtual void beginRendering() = 0;
+	virtual void endRendering() = 0;
+
   protected:
     bool initializeCompiler();
     ShaderBlob *compileToBinary(gl::InfoLog &infoLog, const char *hlsl, const char *profile, UINT optimizationFlags, bool alternateFlags);

@@ -189,6 +189,9 @@ class Renderer9 : public Renderer
     virtual QueryImpl *createQuery(GLenum type);
     virtual FenceImpl *createFence();
 
+	virtual void beginRendering();
+	virtual void endRendering();
+
     // D3D9-renderer specific methods
     bool boxFilter(IDirect3DSurface9 *source, IDirect3DSurface9 *dest);
 
@@ -231,6 +234,9 @@ class Renderer9 : public Renderer
 
 	EGLint mClientDeviceType;
 	void* mClientDevice;
+	bool mIsStateSet;
+	IDirect3DStateBlock9* mForeignState;
+	IDirect3DStateBlock9* mLocalState;
 
     Blit *mBlit;
 

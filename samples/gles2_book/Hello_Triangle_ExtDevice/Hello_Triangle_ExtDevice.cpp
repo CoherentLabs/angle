@@ -42,6 +42,8 @@ struct _Context {
 	GLuint ProgramObject;
 
 	PFNEGLGETDISPLAYANGLE eglGetDisplayANGLE;
+	PFNEGLBEGINRENDERINGANGLE eglBeginRenderingANGLE;
+	PFNEGLENDRENDERINGANGLE eglEndRenderingANGLE;
 } g_Context = {0};
 
 ///
@@ -95,6 +97,8 @@ GLuint LoadShader ( GLenum type, const char *shaderSrc )
 //
 int Init ()
 {
+   g_Context.eglBeginRenderingANGLE(g_Context.Display);
+
    const char vShaderStr[] =  
       "attribute vec4 vPosition;    \n"
       "void main()                  \n"
@@ -122,7 +126,10 @@ int Init ()
    programObject = glCreateProgram ( );
    
    if ( programObject == 0 )
+   {
+      g_Context.eglEndRenderingANGLE(g_Context.Display);
       return 0;
+   }
 
    glAttachShader ( programObject, vertexShader );
    glAttachShader ( programObject, fragmentShader );
@@ -152,6 +159,7 @@ int Init ()
       }
 
       glDeleteProgram ( programObject );
+	  g_Context.eglEndRenderingANGLE(g_Context.Display);
       return FALSE;
    }
 
@@ -159,6 +167,9 @@ int Init ()
    g_Context.ProgramObject = programObject;
 
    glClearColor ( 0.0f, 0.0f, 0.0f, 0.0f );
+
+   g_Context.eglEndRenderingANGLE(g_Context.Display);
+
    return TRUE;
 }
 
@@ -167,6 +178,8 @@ int Init ()
 //
 void Draw ( )
 {
+   g_Context.eglBeginRenderingANGLE(g_Context.Display);
+
    GLfloat vVertices[] = {  0.0f,  0.5f, 0.0f, 
                            -0.5f, -0.5f, 0.0f,
                             0.5f, -0.5f, 0.0f };
@@ -187,6 +200,8 @@ void Draw ( )
    glDrawArrays ( GL_TRIANGLES, 0, 3 );
 
    eglSwapBuffers ( g_Context.Display, g_Context.Surface );
+   
+   g_Context.eglEndRenderingANGLE(g_Context.Display);
 }
 
 LRESULT WINAPI WindowProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) 
@@ -392,7 +407,9 @@ bool InitializeDirectX11() {
 
 bool InitializeGLES() {
 	g_Context.eglGetDisplayANGLE = (PFNEGLGETDISPLAYANGLE) eglGetProcAddress("eglGetDisplayANGLE");
-	
+	g_Context.eglBeginRenderingANGLE = (PFNEGLBEGINRENDERINGANGLE) eglGetProcAddress("eglBeginRenderingANGLE");
+	g_Context.eglEndRenderingANGLE= (PFNEGLENDRENDERINGANGLE) eglGetProcAddress("eglEndRenderingANGLE");
+
 	switch(g_DeviceType)
 	{
 	case DT_Dx9:
