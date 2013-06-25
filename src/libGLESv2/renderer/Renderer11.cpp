@@ -438,6 +438,10 @@ EGLint Renderer11::initialize()
         }
     }
 
+	if(mClientDevice)
+	{
+		mLocalState.Capture(mDeviceContext);
+	}
     return EGL_SUCCESS;
 }
 

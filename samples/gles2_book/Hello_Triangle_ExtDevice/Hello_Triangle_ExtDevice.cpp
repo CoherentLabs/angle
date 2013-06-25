@@ -18,7 +18,7 @@ enum DeviceType
 	DT_Dx11
 };
 
-static const DeviceType g_DeviceType = DT_Dx11;
+static const DeviceType g_DeviceType = DT_Dx9;
 
 struct _Context {
 	~_Context() {

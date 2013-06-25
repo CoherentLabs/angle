@@ -137,8 +137,8 @@ void Renderer9::nullAll()
 	mClientDevice = NULL;
 
 	mIsStateSet = false;
-	mForeignState = false;
-	mLocalState = false;
+	mForeignState = NULL;
+	mLocalState = NULL;
 }
 
 Renderer9::~Renderer9()
@@ -535,7 +535,12 @@ EGLint Renderer9::initialize()
 
     initializeDevice();
 
-    return EGL_SUCCESS;
+	if(mClientDevice && !mLocalState)
+	{
+		mDevice->CreateStateBlock(D3DSBT_ALL, &mLocalState);
+		mLocalState->Capture();
+	}
+	return EGL_SUCCESS;
 }
 
 // do any one-time device initialization
@@ -3275,12 +3280,7 @@ void Renderer9::beginRendering()
 	{
 		mDevice->CreateStateBlock(D3DSBT_ALL, &mForeignState);
 	}
-	if(!mLocalState)
-	{
-		mDevice->CreateStateBlock(D3DSBT_ALL, &mLocalState);
-		mLocalState->Capture();
-	}
-
+	
 	mForeignState->Capture();
 	mLocalState->Apply();
 	mIsStateSet = true;
