@@ -17,7 +17,7 @@
 
 #if !defined(ANGLE_ENABLE_D3D11)
 // Enables use of the Direct3D 11 API for a default display, when available
-#define ANGLE_ENABLE_D3D11 1
+#define ANGLE_ENABLE_D3D11 0
 #endif
 
 namespace rx
@@ -219,10 +219,6 @@ rx::Renderer *glCreateRendererFromDevice(egl::Display *display, EGLint type, voi
 
 	if(type == EGL_ANGLE_D3D11_DISPLAY_DEVICE)
 	{
-		if(!ANGLE_ENABLE_D3D11)
-		{
-			return NULL;
-		}
         renderer = new rx::Renderer11(display, device);
 	}
 	else
