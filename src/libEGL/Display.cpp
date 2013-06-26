@@ -461,6 +461,11 @@ void Display::destroyContext(gl::Context *context)
     mContextSet.erase(context);
 }
 
+void* Display::getInternalDevice()
+{
+	return mRenderer->getInternalDevice();
+}
+
 void Display::notifyDeviceLost()
 {
     for (ContextSet::iterator context = mContextSet.begin(); context != mContextSet.end(); context++)

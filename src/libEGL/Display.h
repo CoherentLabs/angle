@@ -57,6 +57,7 @@ class Display
     rx::Renderer *getRenderer() { return mRenderer; };
 
     // exported methods must be virtual
+	virtual void* getInternalDevice();
     virtual void notifyDeviceLost();
     virtual void recreateSwapChains();
 
