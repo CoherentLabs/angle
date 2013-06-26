@@ -101,6 +101,7 @@ class Renderer
 
     virtual EGLint initialize() = 0;
     virtual bool resetDevice() = 0;
+	virtual void* getInternalDevice() = 0;
 
     virtual int generateConfigs(ConfigDesc **configDescList) = 0;
     virtual void deleteConfigs(ConfigDesc *configDescList) = 0;

@@ -176,7 +176,8 @@ class Renderer11 : public Renderer
     virtual FenceImpl *createFence();
 
     // D3D11-renderer specific methods
-    ID3D11Device *getDevice() { return mDevice; }
+    virtual void* getInternalDevice() { return mDevice; }
+	ID3D11Device *getDevice() { return mDevice; }
     ID3D11DeviceContext *getDeviceContext() { return mDeviceContext; };
     IDXGIFactory *getDxgiFactory() { return mDxgiFactory; };
 
