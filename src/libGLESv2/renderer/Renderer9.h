@@ -43,8 +43,8 @@ class Renderer9 : public Renderer
     virtual int generateConfigs(ConfigDesc **configDescList);
     virtual void deleteConfigs(ConfigDesc *configDescList);
 
-    void startScene();
-    void endScene();
+    virtual void startScene();
+    virtual void endScene();
 
     virtual void sync(bool block);
 

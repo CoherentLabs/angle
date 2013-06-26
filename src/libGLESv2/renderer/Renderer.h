@@ -106,6 +106,9 @@ class Renderer
     virtual int generateConfigs(ConfigDesc **configDescList) = 0;
     virtual void deleteConfigs(ConfigDesc *configDescList) = 0;
 
+    virtual void startScene() = 0;
+    virtual void endScene() = 0;
+
     virtual void sync(bool block) = 0;
 
     virtual SwapChain *createSwapChain(HWND window, HANDLE shareHandle, GLenum backBufferFormat, GLenum depthBufferFormat) = 0;

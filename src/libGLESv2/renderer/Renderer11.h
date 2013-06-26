@@ -52,6 +52,9 @@ class Renderer11 : public Renderer
     virtual int generateConfigs(ConfigDesc **configDescList);
     virtual void deleteConfigs(ConfigDesc *configDescList);
 
+	virtual void startScene() {}
+	virtual void endScene() {}
+
     virtual void sync(bool block);
 
     virtual SwapChain *createSwapChain(HWND window, HANDLE shareHandle, GLenum backBufferFormat, GLenum depthBufferFormat);
