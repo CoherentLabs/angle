@@ -28,7 +28,8 @@ class SwapChain11 : public SwapChain
     virtual EGLint swapRect(EGLint x, EGLint y, EGLint width, EGLint height);
     virtual void recreate();
 
-    virtual ID3D11Texture2D *getOffscreenTexture();
+    virtual void* getInternalRenderTarget();
+	virtual ID3D11Texture2D *getOffscreenTexture();
     virtual ID3D11RenderTargetView *getRenderTarget();
     virtual ID3D11ShaderResourceView *getRenderTargetShaderResource();
 

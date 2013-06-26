@@ -44,6 +44,7 @@ class Surface
     bool resetSwapChain();
 
     HWND getWindowHandle();
+	virtual void* getRenderTarget();
     bool swap();
     bool postSubBuffer(EGLint x, EGLint y, EGLint width, EGLint height);
 

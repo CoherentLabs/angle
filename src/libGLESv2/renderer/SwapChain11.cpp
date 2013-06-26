@@ -707,6 +707,11 @@ ID3D11Texture2D *SwapChain11::getOffscreenTexture()
     return mOffscreenTexture;
 }
 
+void* SwapChain11::getInternalRenderTarget()
+{
+	return getRenderTarget();
+}
+
 // Increments refcount on view.
 // caller must Release() the returned view
 ID3D11RenderTargetView *SwapChain11::getRenderTarget()

@@ -357,6 +357,11 @@ EGLint SwapChain9::swapRect(EGLint x, EGLint y, EGLint width, EGLint height)
     return EGL_SUCCESS;
 }
 
+void* SwapChain9::getInternalRenderTarget()
+{
+	return getRenderTarget();
+}
+
 // Increments refcount on surface.
 // caller must Release() the returned surface
 IDirect3DSurface9 *SwapChain9::getRenderTarget()

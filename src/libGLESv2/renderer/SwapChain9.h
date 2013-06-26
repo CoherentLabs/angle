@@ -28,6 +28,7 @@ class SwapChain9 : public SwapChain
     virtual EGLint swapRect(EGLint x, EGLint y, EGLint width, EGLint height);
     virtual void recreate();
 
+	virtual void* getInternalRenderTarget();
     virtual IDirect3DSurface9 *getRenderTarget();
     virtual IDirect3DSurface9 *getDepthStencil();
     virtual IDirect3DTexture9 *getOffscreenTexture();

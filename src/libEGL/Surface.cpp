@@ -133,6 +133,11 @@ bool Surface::resetSwapChain()
     return true;
 }
 
+void* Surface::getRenderTarget()
+{
+	return mSwapChain->getInternalRenderTarget();
+}
+
 bool Surface::resizeSwapChain(int backbufferWidth, int backbufferHeight)
 {
     ASSERT(backbufferWidth >= 0 && backbufferHeight >= 0);
