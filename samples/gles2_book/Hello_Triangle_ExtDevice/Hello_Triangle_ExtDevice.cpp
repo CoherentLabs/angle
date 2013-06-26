@@ -202,7 +202,7 @@ void ResetDevice()
 			return;
 	}
 
-	if(!g_Context.eglTryRestoreDeviceANGLE(g_Context.Display)) // this call must secceed and will restore the internal state in GLES
+	if(!g_Context.eglTryRestoreDeviceANGLE(g_Context.Display)) // this call must succeed and will restore the internal state in GLES
 		return;
 
 	if(!InitializeGLES())
