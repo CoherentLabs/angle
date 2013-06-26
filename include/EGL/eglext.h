@@ -355,10 +355,12 @@ typedef EGLuint64NV (EGLAPIENTRYP PFNEGLGETSYSTEMTIMENVPROC) (void);
 #define EGL_ANGLE_D3D11_DISPLAY_DEVICE 3
 #ifdef EGL_EGLEXT_PROTOTYPES
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplayANGLE(EGLint type, void* device);
+EGLAPI EGLBoolean EGLAPIENTRY eglTryRestoreDeviceANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglBeginRenderingANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglEndRenderingANGLE(EGLDisplay display);
 #else
 typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETDISPLAYANGLE)(EGLint, void*);
+typedef EGLBoolean (EGLAPIENTRYP PFNEGLTRYRESTOREDEVICEANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLBEGINRENDERINGANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLENDRENDERINGANGLE)(EGLDisplay display);
 #endif

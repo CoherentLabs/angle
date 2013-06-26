@@ -1162,6 +1162,12 @@ EGLDisplay __stdcall eglGetDisplayANGLE(EGLint type, void* device)
     }
 }
 
+EGLBoolean __stdcall eglTryRestoreDeviceANGLE(EGLDisplay display)
+{
+	egl::Display *d = static_cast<egl::Display*>(display);
+	return d->tryRestoreLostDevice();
+}
+	
 void __stdcall eglBeginRenderingANGLE(EGLDisplay display)
 {
 	egl::Display *d = static_cast<egl::Display*>(display);
@@ -1191,6 +1197,7 @@ __eglMustCastToProperFunctionPointerType __stdcall eglGetProcAddress(const char 
             {"eglQuerySurfacePointerANGLE", (__eglMustCastToProperFunctionPointerType)eglQuerySurfacePointerANGLE},
             {"eglPostSubBufferNV", (__eglMustCastToProperFunctionPointerType)eglPostSubBufferNV},
 			{"eglGetDisplayANGLE", (__eglMustCastToProperFunctionPointerType)eglGetDisplayANGLE},
+			{"eglTryRestoreDeviceANGLE", (__eglMustCastToProperFunctionPointerType)eglTryRestoreDeviceANGLE},
 			{"eglBeginRenderingANGLE", (__eglMustCastToProperFunctionPointerType)eglBeginRenderingANGLE},
 			{"eglEndRenderingANGLE", (__eglMustCastToProperFunctionPointerType)eglEndRenderingANGLE},
             {"", NULL},

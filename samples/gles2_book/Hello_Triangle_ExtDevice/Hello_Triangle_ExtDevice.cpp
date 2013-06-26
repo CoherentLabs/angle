@@ -11,6 +11,9 @@
 #define WIDTH 640
 #define HEIGHT 480
 
+void CleanUpGLES();
+bool InitializeGLES();
+
 enum DeviceType
 {
 	DT_Dx9,
@@ -31,10 +34,12 @@ struct _Context {
 	}
 	HWND hWnd;
 	HMODULE D3DModule;
+	D3DPRESENT_PARAMETERS PresentParams;
 	IDirect3D9* D3D;
 	IDirect3DDevice9* Device;
 	ID3D11Device* Device11;
 	ID3D11DeviceContext* Context11;
+	bool HasLostDevice;
 
 	EGLDisplay Display;
 	EGLSurface Surface;
@@ -42,8 +47,10 @@ struct _Context {
 	GLuint ProgramObject;
 
 	PFNEGLGETDISPLAYANGLE eglGetDisplayANGLE;
+	PFNEGLTRYRESTOREDEVICEANGLE eglTryRestoreDeviceANGLE;
 	PFNEGLBEGINRENDERINGANGLE eglBeginRenderingANGLE;
 	PFNEGLENDRENDERINGANGLE eglEndRenderingANGLE;
+	PFNGLGETGRAPHICSRESETSTATUSEXTPROC glGetGraphicsResetStatusEXT;
 } g_Context = {0};
 
 ///
@@ -173,11 +180,54 @@ int Init ()
    return TRUE;
 }
 
+void ResetDevice()
+{
+	CleanUpGLES();
+	
+	g_Context.eglTryRestoreDeviceANGLE(g_Context.Display); // this call will fail but will clear all internal used resources
+
+	if(g_Context.Device)
+	{
+		HRESULT result = g_Context.Device->TestCooperativeLevel();
+	    while (result == D3DERR_DEVICELOST)
+	    {
+	       Sleep(100);
+	       result = g_Context.Device->TestCooperativeLevel();
+	    }
+	    if (result == D3DERR_DEVICENOTRESET)
+	    {
+	        result = g_Context.Device->Reset(&g_Context.PresentParams);
+	    }
+		if(result != D3D_OK)
+			return;
+	}
+
+	if(!g_Context.eglTryRestoreDeviceANGLE(g_Context.Display)) // this call must secceed and will restore the internal state in GLES
+		return;
+
+	if(!InitializeGLES())
+	   return;
+	if(!Init())
+	   return;
+}
+
 ///
 // Draw a triangle using the shader pair created in Init()
 //
 void Draw ( )
 {
+   if(g_Context.HasLostDevice)
+   {
+	   if(g_Context.glGetGraphicsResetStatusEXT() == GL_NO_ERROR)
+	   {
+		   ResetDevice();
+	   }
+	   g_Context.HasLostDevice = false;
+   }
+   
+   if(g_Context.HasLostDevice)
+	   return;
+
    g_Context.eglBeginRenderingANGLE(g_Context.Display);
 
    GLfloat vVertices[] = {  0.0f,  0.5f, 0.0f, 
@@ -199,7 +249,7 @@ void Draw ( )
 
    glDrawArrays ( GL_TRIANGLES, 0, 3 );
 
-   eglSwapBuffers ( g_Context.Display, g_Context.Surface );
+   g_Context.HasLostDevice = !eglSwapBuffers ( g_Context.Display, g_Context.Surface );
    
    g_Context.eglEndRenderingANGLE(g_Context.Display);
 }
@@ -327,16 +377,15 @@ bool InitializeDirectX9() {
 
 	// Initialize with a dummy window
 	HWND window = GetShellWindow();
-	D3DPRESENT_PARAMETERS presentParams = {0};
-	presentParams.BackBufferWidth = 1;
-	presentParams.BackBufferHeight = 1;
-	presentParams.BackBufferCount = 1;
-	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
-	presentParams.hDeviceWindow = window;
-	presentParams.Windowed = TRUE;
-	presentParams.Flags = 0;
-	presentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	g_Context.PresentParams.BackBufferWidth = 1;
+	g_Context.PresentParams.BackBufferHeight = 1;
+	g_Context.PresentParams.BackBufferCount = 1;
+	g_Context.PresentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
+	g_Context.PresentParams.hDeviceWindow = window;
+	g_Context.PresentParams.Windowed = TRUE;
+	g_Context.PresentParams.Flags = 0;
+	g_Context.PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	g_Context.PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
 	HRESULT hr = S_OK;
 
@@ -348,7 +397,7 @@ bool InitializeDirectX9() {
 						, D3DDEVTYPE_HAL
 						, window
 						, D3DCREATE_FPU_PRESERVE | D3DCREATE_HARDWARE_VERTEXPROCESSING
-						, &presentParams
+						, &g_Context.PresentParams
 						, NULL
 						, &deviceEx);
 		g_Context.Device = deviceEx;
@@ -360,7 +409,7 @@ bool InitializeDirectX9() {
 						, D3DDEVTYPE_HAL
 						, window
 						, D3DCREATE_FPU_PRESERVE | D3DCREATE_HARDWARE_VERTEXPROCESSING
-						, &presentParams
+						, &g_Context.PresentParams
 						, &g_Context.Device);
 	}
 
@@ -406,28 +455,32 @@ bool InitializeDirectX11() {
 }
 
 bool InitializeGLES() {
-	g_Context.eglGetDisplayANGLE = (PFNEGLGETDISPLAYANGLE) eglGetProcAddress("eglGetDisplayANGLE");
-	g_Context.eglBeginRenderingANGLE = (PFNEGLBEGINRENDERINGANGLE) eglGetProcAddress("eglBeginRenderingANGLE");
-	g_Context.eglEndRenderingANGLE= (PFNEGLENDRENDERINGANGLE) eglGetProcAddress("eglEndRenderingANGLE");
-
-	switch(g_DeviceType)
+	if(!g_Context.Display)
 	{
-	case DT_Dx9:
-		g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9_DISPLAY_DEVICE, g_Context.Device);
-		break;
-	case DT_Dx9Ex:
-		g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9EX_DISPLAY_DEVICE, g_Context.Device);
-		break;
-	case DT_Dx11:
-		g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D11_DISPLAY_DEVICE, g_Context.Device11);
-		break;
-	default:
-		return false;
-	};
-	
-	if(!eglInitialize(g_Context.Display, NULL, NULL))
-	   return false;
+		g_Context.eglGetDisplayANGLE = (PFNEGLGETDISPLAYANGLE) eglGetProcAddress("eglGetDisplayANGLE");
+		g_Context.eglTryRestoreDeviceANGLE = (PFNEGLTRYRESTOREDEVICEANGLE) eglGetProcAddress("eglTryRestoreDeviceANGLE");
+		g_Context.eglBeginRenderingANGLE = (PFNEGLBEGINRENDERINGANGLE) eglGetProcAddress("eglBeginRenderingANGLE");
+		g_Context.eglEndRenderingANGLE = (PFNEGLENDRENDERINGANGLE) eglGetProcAddress("eglEndRenderingANGLE");
+		g_Context.glGetGraphicsResetStatusEXT = (PFNGLGETGRAPHICSRESETSTATUSEXTPROC) eglGetProcAddress("glGetGraphicsResetStatusEXT");
 
+		switch(g_DeviceType)
+		{
+		case DT_Dx9:
+			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9_DISPLAY_DEVICE, g_Context.Device);
+			break;
+		case DT_Dx9Ex:
+			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9EX_DISPLAY_DEVICE, g_Context.Device);
+			break;
+		case DT_Dx11:
+			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D11_DISPLAY_DEVICE, g_Context.Device11);
+			break;
+		default:
+			return false;
+		};
+		
+		if(!eglInitialize(g_Context.Display, NULL, NULL))
+		   return false;
+	}
 	static const EGLint configAttribs[] = {
 		EGL_BUFFER_SIZE, 32,
 		EGL_ALPHA_SIZE, 8,
@@ -485,6 +538,20 @@ bool InitializeGLES() {
 	return true;
 }
 
+void CleanUpGLES()
+{
+	if(g_Context.Surface)
+	{
+		eglDestroySurface(g_Context.Display, g_Context.Surface);
+		g_Context.Surface = 0;
+	}
+	if(g_Context.Context)
+	{
+		eglDestroyContext(g_Context.Display, g_Context.Context);
+		g_Context.Context = 0;
+	}
+}
+
 int main ( int argc, char *argv[] )
 {
 	g_Context.hWnd = CreateWin(640, 480, "Hello_Triangle_ExtDevice");
@@ -510,6 +577,7 @@ int main ( int argc, char *argv[] )
 
 	WinLoop();
 
+	CleanUpGLES();
 	if(!eglTerminate(g_Context.Display))
 		return 5;
 

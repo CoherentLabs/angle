@@ -409,6 +409,11 @@ EGLContext Display::createContext(EGLConfig configHandle, const gl::Context *sha
     return context;
 }
 
+bool Display::tryRestoreLostDevice()
+{
+	return restoreLostDevice();
+}
+
 bool Display::restoreLostDevice()
 {
     for (ContextSet::iterator ctx = mContextSet.begin(); ctx != mContextSet.end(); ctx++)

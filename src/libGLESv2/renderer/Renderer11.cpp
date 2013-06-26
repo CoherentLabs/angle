@@ -124,6 +124,7 @@ void Renderer11::nullAll()
     mBGRATextureSupport = false;
 
     mIsGeometryShaderActive = false;
+	mClientDevice = NULL;
 }
 
 Renderer11::~Renderer11()

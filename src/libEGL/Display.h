@@ -63,6 +63,7 @@ class Display
     const char *getExtensionString() const;
     const char *getVendorString() const;
 
+	bool tryRestoreLostDevice();
   private:
     DISALLOW_COPY_AND_ASSIGN(Display);
 

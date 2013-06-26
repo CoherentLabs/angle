@@ -535,11 +535,6 @@ EGLint Renderer9::initialize()
 
     initializeDevice();
 
-	if(mClientDevice && !mLocalState)
-	{
-		mDevice->CreateStateBlock(D3DSBT_ALL, &mLocalState);
-		mLocalState->Capture();
-	}
 	return EGL_SUCCESS;
 }
 
@@ -569,6 +564,23 @@ void Renderer9::initializeDevice()
     mBlit = new Blit(this);
     mVertexDataManager = new rx::VertexDataManager(this);
     mIndexDataManager = new rx::IndexDataManager(this);
+
+	if(mLocalState)
+	{
+		mLocalState->Release();
+		mLocalState = NULL;
+	}
+	if(mForeignState)
+	{
+		mForeignState->Release();
+		mForeignState = NULL;
+	}
+
+	if(mClientDevice && !mLocalState)
+	{
+		mDevice->CreateStateBlock(D3DSBT_ALL, &mLocalState);
+		mLocalState->Capture();
+	}
 }
 
 D3DPRESENT_PARAMETERS Renderer9::getDefaultPresentParameters()
@@ -2175,33 +2187,40 @@ bool Renderer9::resetDevice()
 
     HRESULT result = D3D_OK;
     bool lost = testDeviceLost(false);
-    int attempts = 3;
+	int attempts = mClientDevice ? 1 : 3;
 
     while (lost && attempts > 0)
     {
-        if (mDeviceEx)
-        {
-            Sleep(500);   // Give the graphics driver some CPU time
-            result = mDeviceEx->ResetEx(&presentParameters, NULL);
-        }
-        else
-        {
-            result = mDevice->TestCooperativeLevel();
-            while (result == D3DERR_DEVICELOST)
-            {
-                Sleep(100);   // Give the graphics driver some CPU time
-                result = mDevice->TestCooperativeLevel();
-            }
+		if(!mClientDevice) // only the client resets the device
+		{
+			if (mDeviceEx)
+			{
+			    Sleep(500);   // Give the graphics driver some CPU time
+			    result = mDeviceEx->ResetEx(&presentParameters, NULL);
+			}
+			else
+			{
+			    result = mDevice->TestCooperativeLevel();
+			    while (result == D3DERR_DEVICELOST)
+			    {
+			        Sleep(100);   // Give the graphics driver some CPU time
+			        result = mDevice->TestCooperativeLevel();
+			    }
 
-            if (result == D3DERR_DEVICENOTRESET)
-            {
-                result = mDevice->Reset(&presentParameters);
-            }
-        }
-
+			    if (result == D3DERR_DEVICENOTRESET)
+			    {
+			        result = mDevice->Reset(&presentParameters);
+			    }
+			}
+		}
         lost = testDeviceLost(false);
         attempts --;
     }
+
+	if(lost && mClientDevice)
+	{
+		return false;
+	}
 
     if (FAILED(result))
     {
