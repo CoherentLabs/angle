@@ -358,11 +358,13 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplayANGLE(EGLint type, void* device);
 EGLAPI EGLBoolean EGLAPIENTRY eglTryRestoreDeviceANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglBeginRenderingANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglEndRenderingANGLE(EGLDisplay display);
+EGLAPI void EGLAPIENTRY eglForceDisableSharedTexturesANGLE(EGLBoolean disable);
 #else
 typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETDISPLAYANGLE)(EGLint, void*);
 typedef EGLBoolean (EGLAPIENTRYP PFNEGLTRYRESTOREDEVICEANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLBEGINRENDERINGANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLENDRENDERINGANGLE)(EGLDisplay display);
+typedef void (EGLAPIENTRYP PFNEGLFORCEDISABLESHAREDTEXTURESANGLE)(EGLBoolean disable);
 #endif
 #endif
 

@@ -1180,6 +1180,11 @@ void __stdcall eglEndRenderingANGLE(EGLDisplay display)
 	d->getRenderer()->endRendering();
 }
 
+void __stdcall eglForceDisableSharedTexturesANGLE(EGLBoolean disable)
+{
+	egl::Display::forceDisableSharedTextures(disable ? true : false);
+}
+
 __eglMustCastToProperFunctionPointerType __stdcall eglGetProcAddress(const char *procname)
 {
     EVENT("(const char *procname = \"%s\")", procname);
@@ -1200,6 +1205,7 @@ __eglMustCastToProperFunctionPointerType __stdcall eglGetProcAddress(const char 
 			{"eglTryRestoreDeviceANGLE", (__eglMustCastToProperFunctionPointerType)eglTryRestoreDeviceANGLE},
 			{"eglBeginRenderingANGLE", (__eglMustCastToProperFunctionPointerType)eglBeginRenderingANGLE},
 			{"eglEndRenderingANGLE", (__eglMustCastToProperFunctionPointerType)eglEndRenderingANGLE},
+			{"eglForceDisableSharedTexturesANGLE", (__eglMustCastToProperFunctionPointerType)eglForceDisableSharedTexturesANGLE},
             {"", NULL},
         };
 

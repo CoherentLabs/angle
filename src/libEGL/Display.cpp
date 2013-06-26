@@ -31,6 +31,8 @@ namespace
     DisplayMap displays;
 }
 
+bool Display::mForceDisableShareHandleSupport = false;
+
 egl::Display *Display::getDisplay(EGLNativeDisplayType displayId)
 {
     if (displays.find(displayId) != displays.end())
@@ -442,6 +444,10 @@ bool Display::restoreLostDevice()
     return true;
 }
 
+void Display::forceDisableSharedTextures(bool disable)
+{
+	mForceDisableShareHandleSupport = disable;
+}
 
 void Display::destroySurface(egl::Surface *surface)
 {
@@ -508,7 +514,7 @@ bool Display::hasExistingWindowSurface(HWND window)
 void Display::initExtensionString()
 {
     HMODULE swiftShader = GetModuleHandle(TEXT("swiftshader_d3d9.dll"));
-    bool shareHandleSupported = mRenderer->getShareHandleSupport();
+	bool shareHandleSupported = mRenderer->getShareHandleSupport() && !mForceDisableShareHandleSupport;
 
     mExtensionString = "";
 

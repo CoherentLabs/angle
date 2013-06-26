@@ -64,6 +64,7 @@ class Display
     const char *getVendorString() const;
 
 	bool tryRestoreLostDevice();
+	static void forceDisableSharedTextures(bool disable);
   private:
     DISALLOW_COPY_AND_ASSIGN(Display);
 
@@ -93,6 +94,8 @@ class Display
     void initVendorString();
     std::string mExtensionString;
     std::string mVendorString;
+
+	static bool mForceDisableShareHandleSupport;
 };
 }
 
