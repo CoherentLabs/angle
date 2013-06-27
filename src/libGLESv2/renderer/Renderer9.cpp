@@ -137,8 +137,9 @@ void Renderer9::nullAll()
 	mClientDevice = NULL;
 
 	mIsStateSet = false;
-	mForeignState = NULL;
+
 	mLocalState = NULL;
+	mForeignState = NULL;
 }
 
 Renderer9::~Renderer9()
@@ -147,13 +148,15 @@ Renderer9::~Renderer9()
 
 	if (mClientDevice)
 	{
-		if (mForeignState)
+		if(mForeignState)
 		{
 			mForeignState->Release();
+			delete mForeignState;
 		}
-		if (mLocalState)
+		if(mLocalState)
 		{
 			mLocalState->Release();
+			delete mLocalState;
 		}
 	}
 
@@ -565,21 +568,14 @@ void Renderer9::initializeDevice()
     mVertexDataManager = new rx::VertexDataManager(this);
     mIndexDataManager = new rx::IndexDataManager(this);
 
-	if(mLocalState)
-	{
-		mLocalState->Release();
-		mLocalState = NULL;
-	}
-	if(mForeignState)
-	{
-		mForeignState->Release();
-		mForeignState = NULL;
-	}
+	if(!mLocalState)
+		mLocalState = new Dx9State(mDeviceCaps);
+	if(!mForeignState)
+		mForeignState = new Dx9State(mDeviceCaps);
 
-	if(mClientDevice && !mLocalState)
+	if(mClientDevice)
 	{
-		mDevice->CreateStateBlock(D3DSBT_ALL, &mLocalState);
-		mLocalState->Capture();
+		mLocalState->Capture(mDevice);
 	}
 }
 
@@ -2098,6 +2094,8 @@ void Renderer9::releaseDeviceResources()
         mNullColorbufferCache[i].buffer = NULL;
     }
 
+	mLocalState->Release();
+	mForeignState->Release();
 }
 
 
@@ -3290,18 +3288,83 @@ bool Renderer9::getLUID(LUID *adapterLuid) const
     return false;
 }
 
+Renderer9::Dx9State::Dx9State(const D3DCAPS9& caps)
+	: mState(NULL)
+	, mDepthStencilSurface(NULL)
+	, mRenderTargets(NULL)
+	, mRenderTargetsCount(caps.NumSimultaneousRTs)
+{
+	mRenderTargets = new IDirect3DSurface9*[mRenderTargetsCount];
+	for(unsigned i = 0; i < mRenderTargetsCount; ++i)
+	{
+		mRenderTargets[i] = NULL;
+	}
+}
+
+Renderer9::Dx9State::~Dx9State()
+{
+	delete[] mRenderTargets;
+}
+
+void Renderer9::Dx9State::Capture(IDirect3DDevice9* device)
+{
+	Release();
+
+	device->CreateStateBlock(D3DSBT_ALL, &mState);
+
+	for(auto i = 0u; i < mRenderTargetsCount; ++i)
+	{
+		device->GetRenderTarget(i, &mRenderTargets[i]);
+	}
+	device->GetDepthStencilSurface(&mDepthStencilSurface);
+}
+
+void Renderer9::Dx9State::Apply(IDirect3DDevice9* device)
+{
+	mState->Apply();
+	for(auto i = 0u; i < mRenderTargetsCount; ++i)
+	{
+		if(mRenderTargets[i])
+		{
+			device->SetRenderTarget(i, mRenderTargets[i]);
+		}
+	}
+	if(mDepthStencilSurface)
+	{
+		device->SetDepthStencilSurface(mDepthStencilSurface);
+	}
+}
+
+void Renderer9::Dx9State::Release()
+{
+	if(mState)
+	{
+		mState->Release();
+		mState = NULL;
+	}
+	for(auto i = 0u; i < mRenderTargetsCount; ++i)
+	{
+		if(mRenderTargets[i])
+		{
+			mRenderTargets[i]->Release();
+			mRenderTargets[i] = NULL;
+		}
+	}
+
+	if(mDepthStencilSurface)
+	{
+		mDepthStencilSurface->Release();
+		mDepthStencilSurface = NULL;
+	}
+}
+
 void Renderer9::beginRendering()
 {
 	if(!mClientDevice)
 		return;
-
-	if(!mForeignState)
-	{
-		mDevice->CreateStateBlock(D3DSBT_ALL, &mForeignState);
-	}
-	
-	mForeignState->Capture();
-	mLocalState->Apply();
+ 
+	mForeignState->Capture(mDevice);
+	mLocalState->Apply(mDevice);
 	mIsStateSet = true;
 }
 
@@ -3312,8 +3375,8 @@ void Renderer9::endRendering()
 
 	ASSERT(mIsStateSet);
 
-	mLocalState->Capture();
-	mForeignState->Apply();
+	mLocalState->Capture(mDevice);
+	mForeignState->Apply(mDevice);
 	mIsStateSet = false;
 }
 

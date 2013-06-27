@@ -236,8 +236,24 @@ class Renderer9 : public Renderer
 	EGLint mClientDeviceType;
 	void* mClientDevice;
 	bool mIsStateSet;
-	IDirect3DStateBlock9* mForeignState;
-	IDirect3DStateBlock9* mLocalState;
+	class Dx9State
+	{
+	public:
+		Dx9State(const D3DCAPS9& caps);
+		~Dx9State();
+
+		void Capture(IDirect3DDevice9* device);
+		void Apply(IDirect3DDevice9* device);
+		void Release();
+	private:
+		DISALLOW_COPY_AND_ASSIGN(Dx9State);
+		IDirect3DStateBlock9* mState;
+		IDirect3DSurface9** mRenderTargets;
+		unsigned mRenderTargetsCount;
+		IDirect3DSurface9* mDepthStencilSurface;
+	};
+	Dx9State* mForeignState;
+	Dx9State* mLocalState;
 
     Blit *mBlit;
 
