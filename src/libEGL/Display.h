@@ -36,7 +36,7 @@ class Display
     void terminate();
 
     static egl::Display *getDisplay(EGLNativeDisplayType displayId);
-    static egl::Display *getDisplay(EGLint type, void* device);
+    static egl::Display *getDisplay(EGLNativeDisplayType displayId, EGLint type, void* device);
 
     bool getConfigs(EGLConfig *configs, const EGLint *attribList, EGLint configSize, EGLint *numConfig);
     bool getConfigAttrib(EGLConfig config, EGLint attribute, EGLint *value);

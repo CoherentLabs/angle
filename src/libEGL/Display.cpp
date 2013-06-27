@@ -48,16 +48,16 @@ egl::Display *Display::getDisplay(EGLNativeDisplayType displayId)
     return display;
 }
 
-egl::Display *Display::getDisplay(EGLint type, void* device)
+egl::Display *Display::getDisplay(EGLNativeDisplayType displayId, EGLint type, void* device)
 {
-	if (displays.find((EGLNativeDisplayType)device) != displays.end())
+	if (displays.find((EGLNativeDisplayType)displayId) != displays.end())
     {
-        return displays[(EGLNativeDisplayType)device];
+        return displays[(EGLNativeDisplayType)displayId];
     }
     
     egl::Display *display = new egl::Display(type, device);
 
-    displays[(EGLNativeDisplayType)device] = display;
+    displays[(EGLNativeDisplayType)displayId] = display;
     return display;
 }
 

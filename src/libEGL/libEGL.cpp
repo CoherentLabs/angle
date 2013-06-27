@@ -1148,13 +1148,13 @@ EGLBoolean __stdcall eglPostSubBufferNV(EGLDisplay dpy, EGLSurface surface, EGLi
     return EGL_FALSE;
 }
 
-EGLDisplay __stdcall eglGetDisplayANGLE(EGLint type, void* device)
+EGLDisplay __stdcall eglGetDisplayANGLE(EGLNativeDisplayType displayId, EGLint type, void* device)
 {
     EVENT("(EGLint display_id = 0x%0.8p)", type);
 
     try
     {
-        return egl::Display::getDisplay(type, device);
+        return egl::Display::getDisplay(displayId, type, device);
     }
     catch(std::bad_alloc&)
     {

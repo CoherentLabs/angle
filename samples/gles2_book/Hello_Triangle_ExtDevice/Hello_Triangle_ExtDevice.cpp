@@ -466,13 +466,13 @@ bool InitializeGLES() {
 		switch(g_DeviceType)
 		{
 		case DT_Dx9:
-			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9_DISPLAY_DEVICE, g_Context.Device);
+			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_DEFAULT_DISPLAY, EGL_ANGLE_D3D9_DISPLAY_DEVICE, g_Context.Device);
 			break;
 		case DT_Dx9Ex:
-			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D9EX_DISPLAY_DEVICE, g_Context.Device);
+			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_DEFAULT_DISPLAY, EGL_ANGLE_D3D9EX_DISPLAY_DEVICE, g_Context.Device);
 			break;
 		case DT_Dx11:
-			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_ANGLE_D3D11_DISPLAY_DEVICE, g_Context.Device11);
+			g_Context.Display = g_Context.eglGetDisplayANGLE(EGL_DEFAULT_DISPLAY, EGL_ANGLE_D3D11_DISPLAY_DEVICE, g_Context.Device11);
 			break;
 		default:
 			return false;
