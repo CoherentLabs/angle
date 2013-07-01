@@ -3375,6 +3375,8 @@ void Renderer9::endRendering()
 
 	ASSERT(mIsStateSet);
 
+	endScene();
+
 	mLocalState->Capture(mDevice);
 	mForeignState->Apply(mDevice);
 	mIsStateSet = false;
