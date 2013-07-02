@@ -1,7 +1,7 @@
-ANGLE project - Cohernet Labs clone
+ANGLE project - Coherent Labs AD clone
 =====
 
-ANGLE is a GLES2/EGL wrapper implemented via DirectX 9 & 11. for more information visit the project's official repo - http://code.google.com/p/angleproject/.
+ANGLE is a GLES2/EGL wrapper implemented via DirectX 9 & 11. For more information visit the project's official repo - http://code.google.com/p/angleproject/.
 
 Motivation
 =====
@@ -34,5 +34,9 @@ Ex or Dx11 device.
 Future
 =====
 
-We plan to support this feature-set and probably enhance it. The new features and extensions are not part of the official ANGLE project and repository.
+We plan to update this feature-set and enhance it. The new features and extensions are not part of the official ANGLE project and repository.
 In the future we might try to push them to the official repo after consultation with the authors of the ANGLE project.
+
+License
+=====
+This code is governed by the same permissive license that is used in ANGLE. Please refer to the LICENSE file for details.
