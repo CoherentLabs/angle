@@ -1,4 +1,4 @@
-ANGLE project - Coherent Labs AD clone
+ANGLE project - Coherent Labs AD extensions
 =====
 
 ANGLE is a GLES2/EGL wrapper implemented via DirectX 9 & 11. For more information visit the project's official repo - http://code.google.com/p/angleproject/.
