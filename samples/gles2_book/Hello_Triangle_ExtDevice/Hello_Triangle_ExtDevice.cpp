@@ -1,3 +1,7 @@
+// Copyright (c) 2013 Coherent Labs AD, Stoyan Nikolov. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include <stdlib.h>
 #define WIN32_LEAN_AND_MEAN
 #include <d3d9.h>
