@@ -25,7 +25,7 @@ Ex or Dx11 device.
   - void eglBeginRenderingANGLE(EGLDisplay display) - marks the begginning of OpenGL rendering. Captures all th device state before the call and applies the last saved ANGLE device state.
   - void eglEndRenderingANGLE(EGLDisplay display) - saves the ANGLE device state and re-applies the lasst saved client state.
  All OpenGL rendering when using a client device must happen in a eglBeginRenderingANGLE / eglEndRenderingANGLE block. These calls prevent device state to leak between the client code and ANGLE. Failing to do so will result in undefined rendering behavior.
- void eglForceDisableSharedTexturesANGLE(EGLBoolean disable) - Forces ANGLE not support shared textures even on devices that could support it (like Dx9Ex and Dx11).
+  - void eglForceDisableSharedTexturesANGLE(EGLBoolean disable) - Forces ANGLE not support shared textures even on devices that could support it (like Dx9Ex and Dx11).
  
  - Some APIs have been moved to higher abstract interfaces to make embedding in certain applications easier and accessing some internal resources faster.
  
