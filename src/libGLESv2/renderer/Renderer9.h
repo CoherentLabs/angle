@@ -204,11 +204,8 @@ class Renderer9 : public Renderer
   private:
     DISALLOW_COPY_AND_ASSIGN(Renderer9);
 
-<<<<<<< HEAD
 	void nullAll();
-=======
     void deinitialize();
->>>>>>> 970fc6bb4285cd43a3bd6a1651d7bdbf70bc97ec
 
     void applyUniformnfv(gl::Uniform *targetUniform, const GLfloat *v);
     void applyUniformniv(gl::Uniform *targetUniform, const GLint *v);

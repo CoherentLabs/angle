@@ -153,11 +153,13 @@ Renderer9::~Renderer9()
 		{
 			mForeignState->Release();
 			delete mForeignState;
+			mForeignState = NULL;
 		}
 		if(mLocalState)
 		{
 			mLocalState->Release();
 			delete mLocalState;
+			mLocalState = NULL;
 		}
 	}
 
@@ -412,10 +414,7 @@ EGLint Renderer9::initialize()
 	    }
 
 		D3DPRESENT_PARAMETERS presentParameters = getDefaultPresentParameters();
-		DWORD behaviorFlags = D3DCREATE_FPU_PRESERVE | D3DCREATE_NOWINDOWCHANGES;
-
-    }
-
+		DWORD behaviorFlags = D3DCREATE_FPU_PRESERVE | D3DCREATE_NOWINDOWCHANGES;   
 		{
 	        TRACE_EVENT0("gpu", "D3d9_CreateDevice");
 	        result = mD3d9->CreateDevice(mAdapter, mDeviceType, mDeviceWindow, behaviorFlags | D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, &presentParameters, &mDevice);
@@ -2131,8 +2130,11 @@ void Renderer9::releaseDeviceResources()
         SafeDelete(mNullColorbufferCache[i].buffer);
     }
 
-	mLocalState->Release();
-	mForeignState->Release();
+	if (mLocalState)
+		mLocalState->Release();
+
+	if (mForeignState)
+		mForeignState->Release();
 }
 
 
