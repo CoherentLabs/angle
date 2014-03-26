@@ -204,7 +204,11 @@ class Renderer9 : public Renderer
   private:
     DISALLOW_COPY_AND_ASSIGN(Renderer9);
 
+<<<<<<< HEAD
 	void nullAll();
+=======
+    void deinitialize();
+>>>>>>> 970fc6bb4285cd43a3bd6a1651d7bdbf70bc97ec
 
     void applyUniformnfv(gl::Uniform *targetUniform, const GLfloat *v);
     void applyUniformniv(gl::Uniform *targetUniform, const GLint *v);
@@ -225,6 +229,10 @@ class Renderer9 : public Renderer
     void initializeDevice();
     D3DPRESENT_PARAMETERS getDefaultPresentParameters();
     void releaseDeviceResources();
+
+    HRESULT getDeviceStatusCode();
+    bool isRemovedDeviceResettable() const;
+    bool resetRemovedDevice();
 
     UINT mAdapter;
     D3DDEVTYPE mDeviceType;
@@ -328,6 +336,7 @@ class Renderer9 : public Renderer
     gl::Rectangle mCurViewport;
     float mCurNear;
     float mCurFar;
+    float mCurDepthFront;
 
     bool mForceSetBlendState;
     gl::BlendState mCurBlendState;

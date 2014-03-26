@@ -183,4 +183,6 @@ EXPORTS
     glBindTexImage                  @158 NONAME
     glCreateRenderer                @177 NONAME
     glDestroyRenderer               @178 NONAME
-    glCreateRendererFromDevice      @180 NONAME
+    ; Setting up TRACE macro callbacks
+    SetTraceFunctionPointers        @180
+    glCreateRendererFromDevice      @181 NONAME
