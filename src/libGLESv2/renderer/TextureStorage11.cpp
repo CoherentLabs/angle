@@ -291,6 +291,48 @@ TextureStorage11_2D::TextureStorage11_2D(Renderer *renderer, int levels, GLenum 
     }
 }
 
+TextureStorage11_2D::TextureStorage11_2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture)
+: TextureStorage11(renderer, GetTextureBindFlags(gl_d3d11::ConvertTextureFormat(internalformat), usage, forceRenderable))
+{
+	for (unsigned int i = 0; i < gl::IMPLEMENTATION_MAX_TEXTURE_LEVELS; i++)
+	{
+		mRenderTarget[i] = NULL;
+	}
+
+	DXGI_FORMAT convertedFormat = gl_d3d11::ConvertTextureFormat(internalformat);
+	if (d3d11::IsDepthStencilFormat(convertedFormat))
+	{
+		mTextureFormat = d3d11::GetDepthTextureFormat(convertedFormat);
+		mShaderResourceFormat = d3d11::GetDepthShaderResourceFormat(convertedFormat);
+		mDepthStencilFormat = convertedFormat;
+		mRenderTargetFormat = DXGI_FORMAT_UNKNOWN;
+	}
+	else
+	{
+		mTextureFormat = convertedFormat;
+		mShaderResourceFormat = convertedFormat;
+		mDepthStencilFormat = DXGI_FORMAT_UNKNOWN;
+		mRenderTargetFormat = convertedFormat;
+	}
+
+	if (width > 0 && height > 0)
+	{
+		gl::MakeValidSize(false, gl::IsCompressed(internalformat), &width, &height, &mLodOffset);
+
+		ID3D11Device *device = mRenderer->getDevice();
+
+		mTexture = static_cast<ID3D11Texture2D*>(externalTexture);
+
+		mTexture->AddRef();
+
+		D3D11_TEXTURE2D_DESC desc;
+		mTexture->GetDesc(&desc);
+		mMipLevels = desc.MipLevels;
+		mTextureWidth = desc.Width;
+		mTextureHeight = desc.Height;
+	}
+}
+
 TextureStorage11_2D::~TextureStorage11_2D()
 {
     if (mTexture)

@@ -706,6 +706,21 @@ GLuint Context::createTexture()
     return mResourceManager->createTexture();
 }
 
+GLuint Context::wrapExternalTexture2D(GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture)
+{
+	auto result = createTexture();
+
+	auto texture = static_cast<Texture2D*>(getTexture(result));
+	if (!texture)
+		return 0;
+
+	texture->setImage(0, width, height, format, type, 1, NULL);
+
+	texture->wrapExternalTexture(externalTexture);
+
+	return result;
+}
+
 GLuint Context::createRenderbuffer()
 {
     return mResourceManager->createRenderbuffer();
@@ -2620,6 +2635,8 @@ void Context::initExtensionString()
 
     extensionString += "GL_ANGLE_texture_usage ";
     extensionString += "GL_ANGLE_translated_shader_source ";
+
+	extensionString += "GL_ANGLE_external_texture ";
 
     // Other vendor-specific extensions
     if (supportsEventQueries())

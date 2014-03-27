@@ -1012,6 +1012,16 @@ typedef void (GL_APIENTRYP PFNGLDRAWARRAYSINSTANCEDANGLEPROC) (GLenum mode, GLin
 typedef void (GL_APIENTRYP PFNGLDRAWELEMENTSINSTANCEDANGLEPROC) (GLenum mode, GLsizei count, GLenum type, const GLvoid *indices, GLsizei primcount);
 #endif
 
+/* GL_ANGLE_external_texture */
+#ifndef GL_ANGLE_external_texture
+#define GL_ANGLE_external_texture 1
+#ifdef GL_GLEXT_PROTOTYPES
+GL_APICALL GLuint GL_APIENTRY glWrapExternalTexture2DANGLE(GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture);
+#endif
+typedef GLuint (GL_APIENTRYP PFNGLWRAPEXTERNALTEXTURE2DANGLEPROC) (GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture);
+#endif
+
+
 /*------------------------------------------------------------------------*
  * APPLE extension functions
  *------------------------------------------------------------------------*/

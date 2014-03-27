@@ -75,6 +75,12 @@ TextureStorageInterface2D::TextureStorageInterface2D(Renderer *renderer, int lev
     mInstance = renderer->createTextureStorage2D(levels, internalformat, usage, forceRenderable, width, height);
 }
 
+TextureStorageInterface2D::TextureStorageInterface2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture)
+	: mRenderTargetSerial(gl::RenderbufferStorage::issueSerial())
+{
+	mInstance = renderer->createTextureStorage2DExternal(levels, internalformat, usage, forceRenderable, width, height, externalTexture);
+}
+
 TextureStorageInterface2D::~TextureStorageInterface2D()
 {
 }

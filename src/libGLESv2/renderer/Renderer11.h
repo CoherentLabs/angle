@@ -168,6 +168,7 @@ class Renderer11 : public Renderer
     virtual void generateMipmap(Image *dest, Image *source);
     virtual TextureStorage *createTextureStorage2D(SwapChain *swapChain);
     virtual TextureStorage *createTextureStorage2D(int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height);
+	virtual TextureStorage *createTextureStorage2DExternal(int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture);
     virtual TextureStorage *createTextureStorageCube(int levels, GLenum internalformat, GLenum usage, bool forceRenderable, int size);
 
     // Buffer creation

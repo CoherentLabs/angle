@@ -6870,6 +6870,27 @@ void __stdcall glBlitFramebufferANGLE(GLint srcX0, GLint srcY0, GLint srcX1, GLi
     }
 }
 
+GLuint __stdcall glWrapExternalTexture2DANGLE(GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture)
+{
+	GLuint result = 0;
+	try
+	{
+		gl::Context *context = gl::getNonLostContext();
+
+		if (!context)
+			return result;
+
+		result = context->wrapExternalTexture2D(width, height, format, type, externalTexture);
+	}
+	catch (std::bad_alloc&)
+	{
+		gl::error(GL_OUT_OF_MEMORY);
+		return result;
+	}
+
+	return result;
+}
+
 void __stdcall glTexImage3DOES(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth,
                                GLint border, GLenum format, GLenum type, const GLvoid* pixels)
 {
@@ -7057,7 +7078,8 @@ __eglMustCastToProperFunctionPointerType __stdcall glGetProcAddress(const char *
         {"glDrawArraysInstancedANGLE", (__eglMustCastToProperFunctionPointerType)glDrawArraysInstancedANGLE},
         {"glDrawElementsInstancedANGLE", (__eglMustCastToProperFunctionPointerType)glDrawElementsInstancedANGLE},
         {"glGetProgramBinaryOES", (__eglMustCastToProperFunctionPointerType)glGetProgramBinaryOES},
-        {"glProgramBinaryOES", (__eglMustCastToProperFunctionPointerType)glProgramBinaryOES},    };
+		{ "glWrapExternalTexture2DANGLE", (__eglMustCastToProperFunctionPointerType)glWrapExternalTexture2DANGLE },
+		{ "glProgramBinaryOES", (__eglMustCastToProperFunctionPointerType)glProgramBinaryOES }, };
 
     for (unsigned int ext = 0; ext < ArraySize(glExtensions); ext++)
     {

@@ -186,3 +186,5 @@ EXPORTS
     ; Setting up TRACE macro callbacks
     SetTraceFunctionPointers        @180
     glCreateRendererFromDevice      @181 NONAME
+
+	glWrapExternalTexture2DANGLE    @182

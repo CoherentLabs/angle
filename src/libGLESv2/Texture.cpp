@@ -718,6 +718,33 @@ void Texture2D::createTexture()
     mDirtyImages = true;
 }
 
+void Texture2D::wrapExternalTexture(void* externalTexture)
+{
+	GLsizei width = mImageArray[0]->getWidth();
+	GLsizei height = mImageArray[0]->getHeight();
+
+	if (!(width > 0 && height > 0))
+		return; // do not attempt to create native textures for nonexistant data
+
+	GLint levels = creationLevels(width, height);
+	GLenum internalformat = mImageArray[0]->getInternalFormat();
+
+	delete mTexStorage;
+	mTexStorage = new rx::TextureStorageInterface2D(mRenderer, levels, internalformat, mUsage, false, width, height, externalTexture);
+
+	if (mTexStorage->isManaged())
+	{
+		int levels = levelCount();
+
+		for (int level = 0; level < levels; level++)
+		{
+			mImageArray[level]->setManagedSurface(mTexStorage, level);
+		}
+	}
+
+	mDirtyImages = true;
+}
+
 void Texture2D::updateTexture()
 {
     bool mipmapping = (isMipmapFiltered() && isMipmapComplete());

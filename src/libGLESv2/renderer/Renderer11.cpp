@@ -3047,6 +3047,11 @@ TextureStorage *Renderer11::createTextureStorage2D(int levels, GLenum internalfo
     return new TextureStorage11_2D(this, levels, internalformat, usage, forceRenderable, width, height);
 }
 
+TextureStorage *Renderer11::createTextureStorage2DExternal(int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture)
+{
+	return new TextureStorage11_2D(this, levels, internalformat, usage, forceRenderable, width, height, externalTexture);
+}
+
 TextureStorage *Renderer11::createTextureStorageCube(int levels, GLenum internalformat, GLenum usage, bool forceRenderable, int size)
 {
     return new TextureStorage11_Cube(this, levels, internalformat, usage, forceRenderable, size);

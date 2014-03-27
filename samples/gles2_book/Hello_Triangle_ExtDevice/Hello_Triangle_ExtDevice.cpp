@@ -55,6 +55,8 @@ struct _Context {
 	PFNEGLBEGINRENDERINGANGLE eglBeginRenderingANGLE;
 	PFNEGLENDRENDERINGANGLE eglEndRenderingANGLE;
 	PFNGLGETGRAPHICSRESETSTATUSEXTPROC glGetGraphicsResetStatusEXT;
+
+	PFNGLWRAPEXTERNALTEXTURE2DANGLEPROC glWrapExternalTexture2DANGLE;
 } g_Context = {0};
 
 ///
@@ -466,6 +468,7 @@ bool InitializeGLES() {
 		g_Context.eglBeginRenderingANGLE = (PFNEGLBEGINRENDERINGANGLE) eglGetProcAddress("eglBeginRenderingANGLE");
 		g_Context.eglEndRenderingANGLE = (PFNEGLENDRENDERINGANGLE) eglGetProcAddress("eglEndRenderingANGLE");
 		g_Context.glGetGraphicsResetStatusEXT = (PFNGLGETGRAPHICSRESETSTATUSEXTPROC) eglGetProcAddress("glGetGraphicsResetStatusEXT");
+		g_Context.glWrapExternalTexture2DANGLE = (PFNGLWRAPEXTERNALTEXTURE2DANGLEPROC)eglGetProcAddress("glWrapExternalTexture2DANGLE");
 
 		switch(g_DeviceType)
 		{

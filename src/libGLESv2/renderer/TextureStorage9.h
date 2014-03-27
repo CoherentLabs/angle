@@ -63,6 +63,7 @@ class TextureStorage9_2D : public TextureStorage9
   public:
     TextureStorage9_2D(Renderer *renderer, SwapChain9 *swapchain);
     TextureStorage9_2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height);
+	TextureStorage9_2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture);
     virtual ~TextureStorage9_2D();
 
     static TextureStorage9_2D *makeTextureStorage9_2D(TextureStorage *storage);

@@ -81,6 +81,7 @@ class TextureStorage11_2D : public TextureStorage11
   public:
     TextureStorage11_2D(Renderer *renderer, SwapChain11 *swapchain);
     TextureStorage11_2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height);
+	TextureStorage11_2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture);
     virtual ~TextureStorage11_2D();
 
     static TextureStorage11_2D *makeTextureStorage11_2D(TextureStorage *storage);

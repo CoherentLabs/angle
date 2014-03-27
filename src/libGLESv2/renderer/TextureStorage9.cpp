@@ -141,6 +141,24 @@ TextureStorage9_2D::TextureStorage9_2D(Renderer *renderer, int levels, GLenum in
     initializeRenderTarget();
 }
 
+TextureStorage9_2D::TextureStorage9_2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture)
+: TextureStorage9(renderer, GetTextureUsage(Renderer9::makeRenderer9(renderer)->ConvertTextureInternalFormat(internalformat), usage, forceRenderable))
+{
+	mTexture = NULL;
+	mRenderTarget = NULL;
+	// if the width or height is not positive this should be treated as an incomplete texture
+	// we handle that here by skipping the d3d texture creation
+	if (width > 0 && height > 0)
+	{
+		IDirect3DDevice9 *device = mRenderer->getDevice();
+		gl::MakeValidSize(false, gl::IsCompressed(internalformat), &width, &height, &mLodOffset);
+		mTexture = static_cast<IDirect3DTexture9*>(externalTexture);
+		mTexture->AddRef();
+	}
+
+	initializeRenderTarget();
+}
+
 TextureStorage9_2D::~TextureStorage9_2D()
 {
     if (mTexture)

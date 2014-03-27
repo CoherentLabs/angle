@@ -74,6 +74,7 @@ class TextureStorageInterface2D : public TextureStorageInterface
   public:
     TextureStorageInterface2D(Renderer *renderer, SwapChain *swapchain);
     TextureStorageInterface2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height);
+	TextureStorageInterface2D(Renderer *renderer, int levels, GLenum internalformat, GLenum usage, bool forceRenderable, GLsizei width, GLsizei height, void* externalTexture);
     virtual ~TextureStorageInterface2D();
 
     void generateMipmap(int level);
