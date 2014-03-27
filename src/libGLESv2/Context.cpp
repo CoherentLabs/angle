@@ -710,9 +710,15 @@ GLuint Context::wrapExternalTexture2D(GLsizei width, GLsizei height, GLenum form
 {
 	auto result = createTexture();
 
+	glBindTexture(GL_TEXTURE_2D, result);
+
 	auto texture = static_cast<Texture2D*>(getTexture(result));
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	if (!texture)
+	{
 		return 0;
+	}
 
 	texture->setImage(0, width, height, format, type, 1, NULL);
 
