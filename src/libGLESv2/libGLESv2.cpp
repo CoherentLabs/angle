@@ -6870,7 +6870,7 @@ void __stdcall glBlitFramebufferANGLE(GLint srcX0, GLint srcY0, GLint srcX1, GLi
     }
 }
 
-GLuint __stdcall glWrapExternalTexture2DANGLE(GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture)
+GLuint __stdcall glWrapExternalTexture2DANGLE(GLsizei width, GLsizei height, GLenum format, GLenum type, GLboolean isRenderTarget, void* externalTexture)
 {
 	GLuint result = 0;
 	try
@@ -6880,7 +6880,7 @@ GLuint __stdcall glWrapExternalTexture2DANGLE(GLsizei width, GLsizei height, GLe
 		if (!context)
 			return result;
 
-		result = context->wrapExternalTexture2D(width, height, format, type, externalTexture);
+		result = context->wrapExternalTexture2D(width, height, format, type, isRenderTarget, externalTexture);
 	}
 	catch (std::bad_alloc&)
 	{

@@ -718,7 +718,7 @@ void Texture2D::createTexture()
     mDirtyImages = true;
 }
 
-void Texture2D::wrapExternalTexture(void* externalTexture)
+void Texture2D::wrapExternalTexture(GLboolean isRenderTarget, void* externalTexture)
 {
 	GLsizei width = mImageArray[0]->getWidth();
 	GLsizei height = mImageArray[0]->getHeight();
@@ -730,7 +730,7 @@ void Texture2D::wrapExternalTexture(void* externalTexture)
 	GLenum internalformat = mImageArray[0]->getInternalFormat();
 
 	delete mTexStorage;
-	mTexStorage = new rx::TextureStorageInterface2D(mRenderer, levels, internalformat, mUsage, false, width, height, externalTexture);
+	mTexStorage = new rx::TextureStorageInterface2D(mRenderer, levels, internalformat, mUsage, !!isRenderTarget, width, height, externalTexture);
 
 	if (mTexStorage->isManaged())
 	{

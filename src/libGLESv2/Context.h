@@ -280,7 +280,7 @@ class Context
     GLuint createTexture();
     GLuint createRenderbuffer();
 
-	GLuint wrapExternalTexture2D(GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture);
+	GLuint wrapExternalTexture2D(GLsizei width, GLsizei height, GLenum format, GLenum type, GLboolean isRenderTarget, void* externalTexture);
 
     void deleteBuffer(GLuint buffer);
     void deleteShader(GLuint shader);

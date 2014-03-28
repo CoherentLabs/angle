@@ -706,7 +706,12 @@ GLuint Context::createTexture()
     return mResourceManager->createTexture();
 }
 
-GLuint Context::wrapExternalTexture2D(GLsizei width, GLsizei height, GLenum format, GLenum type, void* externalTexture)
+GLuint Context::wrapExternalTexture2D(GLsizei width,
+	GLsizei height,
+	GLenum format,
+	GLenum type,
+	GLboolean isRenderTarget, 
+	void* externalTexture)
 {
 	auto result = createTexture();
 
@@ -722,7 +727,7 @@ GLuint Context::wrapExternalTexture2D(GLsizei width, GLsizei height, GLenum form
 
 	texture->setImage(0, width, height, format, type, 1, NULL);
 
-	texture->wrapExternalTexture(externalTexture);
+	texture->wrapExternalTexture(isRenderTarget, externalTexture);
 
 	return result;
 }

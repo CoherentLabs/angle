@@ -164,7 +164,7 @@ class Texture2D : public Texture
 
     virtual Renderbuffer *getRenderbuffer(GLenum target);
 
-	void wrapExternalTexture(void* externalTexture);
+	void wrapExternalTexture(GLboolean isRenderTarget, void* externalTexture);
 
   protected:
     friend class RenderbufferTexture2D;
