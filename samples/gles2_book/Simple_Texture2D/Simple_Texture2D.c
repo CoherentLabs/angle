@@ -195,4 +195,6 @@ int main ( int argc, char *argv[] )
    esMainLoop ( &esContext );
 
    ShutDown ( &esContext );
+
+   eglTerminate(esContext.eglDisplay);
 }

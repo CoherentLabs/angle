@@ -2109,7 +2109,7 @@ void Renderer9::markAllStateDirty()
 
 void Renderer9::releaseDeviceResources()
 {
-    while (!mEventQueryPool.empty())
+	while (!mEventQueryPool.empty())
     {
         mEventQueryPool.back()->Release();
         mEventQueryPool.pop_back();
@@ -2124,6 +2124,8 @@ void Renderer9::releaseDeviceResources()
     SafeDelete(mVertexDataManager);
     SafeDelete(mIndexDataManager);
     SafeDelete(mLineLoopIB);
+
+	mVertexDeclarationCache.clear();
 
     for (int i = 0; i < NUM_NULL_COLORBUFFER_CACHE_ENTRIES; i++)
     {

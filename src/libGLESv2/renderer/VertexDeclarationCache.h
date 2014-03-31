@@ -29,6 +29,8 @@ class VertexDeclarationCache
 
     void markStateDirty();
 
+	void clear();
+
   private:
     UINT mMaxLru;
 

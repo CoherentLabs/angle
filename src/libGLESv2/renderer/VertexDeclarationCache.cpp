@@ -32,15 +32,22 @@ VertexDeclarationCache::VertexDeclarationCache() : mMaxLru(0)
     mInstancingEnabled = true;
 }
 
+void VertexDeclarationCache::clear()
+{
+	for (int i = 0; i < NUM_VERTEX_DECL_CACHE_ENTRIES; i++)
+	{
+		if (mVertexDeclCache[i].vertexDeclaration)
+		{
+			mVertexDeclCache[i].vertexDeclaration->Release();
+			mVertexDeclCache[i].vertexDeclaration = NULL;
+		}
+	}
+	markStateDirty();
+}
+
 VertexDeclarationCache::~VertexDeclarationCache()
 {
-    for (int i = 0; i < NUM_VERTEX_DECL_CACHE_ENTRIES; i++)
-    {
-        if (mVertexDeclCache[i].vertexDeclaration)
-        {
-            mVertexDeclCache[i].vertexDeclaration->Release();
-        }
-    }
+	clear();
 }
 
 GLenum VertexDeclarationCache::applyDeclaration(IDirect3DDevice9 *device, TranslatedAttribute attributes[], gl::ProgramBinary *programBinary, GLsizei instances, GLsizei *repeatDraw)
