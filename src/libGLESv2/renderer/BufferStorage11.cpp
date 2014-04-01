@@ -32,6 +32,8 @@ BufferStorage11::BufferStorage11(Renderer11 *renderer)
 
     mReadUsageCount = 0;
     mWriteUsageCount = 0;
+
+	mStagingDataValid = false;
 }
 
 BufferStorage11::~BufferStorage11()
@@ -102,16 +104,19 @@ void *BufferStorage11::getData()
             mResolvedDataSize = mSize;
         }
 
-        D3D11_BOX srcBox;
-        srcBox.left = 0;
-        srcBox.right = mSize;
-        srcBox.top = 0;
-        srcBox.bottom = 1;
-        srcBox.front = 0;
-        srcBox.back = 1;
+		if (!mStagingDataValid)
+		{
+			D3D11_BOX srcBox;
+			srcBox.left = 0;
+			srcBox.right = mSize;
+			srcBox.top = 0;
+			srcBox.bottom = 1;
+			srcBox.front = 0;
+			srcBox.back = 1;
 
-        context->CopySubresourceRegion(mStagingBuffer, 0, 0, 0, 0, mBuffer, 0, &srcBox);
-
+			context->CopySubresourceRegion(mStagingBuffer, 0, 0, 0, 0, mBuffer, 0, &srcBox);
+			mStagingDataValid = true;
+		}
         D3D11_MAPPED_SUBRESOURCE mappedResource;
         result = context->Map(mStagingBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
         if (FAILED(result))
@@ -140,6 +145,8 @@ void BufferStorage11::setData(const void* data, unsigned int size, unsigned int 
     unsigned int requiredBufferSize = size + offset;
     unsigned int requiredStagingSize = size;
     bool directInitialization = offset == 0 && (!mBuffer || mBufferSize < size + offset);
+
+	mStagingDataValid = false;
 
     if (!directInitialization)
     {
@@ -288,7 +295,9 @@ void BufferStorage11::setData(const void* data, unsigned int size, unsigned int 
         mBufferSize = bufferDesc.ByteWidth;
     }
 
-    if (!directInitialization)
+	// COHERENT: Optimization - when data == nullptr we don't have
+	// to update the buffer
+    if (!directInitialization && data)
     {
         ASSERT(mStagingBuffer && mStagingBufferSize >= requiredStagingSize);
 
@@ -302,13 +311,15 @@ void BufferStorage11::setData(const void* data, unsigned int size, unsigned int 
         srcBox.back = 1;
 
         context->CopySubresourceRegion(mBuffer, 0, offset, 0, 0, mStagingBuffer, 0, &srcBox);
+
+		mStagingDataValid = true;
     }
 
     mSize = std::max(mSize, offset + size);
 
     mWriteUsageCount = 0;
 
-    mResolvedDataValid = false;
+	mResolvedDataValid = false;
 }
 
 void BufferStorage11::clear()
@@ -347,6 +358,7 @@ void BufferStorage11::markBufferUsage()
         mStagingBuffer->Release();
         mStagingBuffer = NULL;
         mStagingBufferSize = 0;
+		mStagingDataValid = false;
     }
 }
 

@@ -46,6 +46,10 @@ class BufferStorage11 : public BufferStorage
     void *mResolvedData;
     unsigned int mResolvedDataSize;
     bool mResolvedDataValid;
+	// COHERENT: Optimization when we've just
+	// updated the staging buffer we don't need 
+	// to re-read it
+	bool mStagingDataValid;
 
     unsigned int mReadUsageCount;
     unsigned int mWriteUsageCount;
