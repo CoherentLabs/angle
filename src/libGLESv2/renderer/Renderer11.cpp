@@ -2006,9 +2006,12 @@ void Renderer11::release()
 
     if (mDeviceContext)
     {
-        mDeviceContext->ClearState();
-        mDeviceContext->Flush();
-        mDeviceContext->Release();
+		if (!mClientDevice)
+		{
+			mDeviceContext->ClearState();
+			mDeviceContext->Flush();
+		}
+		mDeviceContext->Release();
         mDeviceContext = NULL;
     }
 
