@@ -153,7 +153,9 @@ EGLBoolean __stdcall eglTerminate(EGLDisplay dpy)
 
         egl::Display *display = static_cast<egl::Display*>(dpy);
 
-        display->terminate();
+		// COHERENT: Delete the display as otherwise it leaks
+		delete display;
+		//display->terminate();
 
         return egl::success(EGL_TRUE);
     }

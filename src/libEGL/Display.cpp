@@ -56,7 +56,7 @@ egl::Display *Display::getDisplay(EGLNativeDisplayType displayId, EGLint type, v
         return displays[(EGLNativeDisplayType)displayId];
     }
     
-    egl::Display *display = new egl::Display(type, device);
+	egl::Display *display = new egl::Display(type, device, displayId);
 
     displays[(EGLNativeDisplayType)displayId] = display;
     return display;
@@ -70,10 +70,11 @@ Display::Display(EGLNativeDisplayType displayId, HDC deviceContext) : mDc(device
     mRenderer = NULL;
 }
 
-Display::Display(EGLint type, void* device)
+Display::Display(EGLint type, void* device, EGLNativeDisplayType originalDisplayId)
 	: mClientDeviceType(type)
 	, mClientDevice(device)
 	, mDc(NULL)
+	, mOriginalDisplayId(originalDisplayId)
 {
 	mDisplayId = (EGLNativeDisplayType)mClientDevice;
 	mRenderer = NULL;
@@ -83,7 +84,7 @@ Display::~Display()
 {
     terminate();
 
-    DisplayMap::iterator thisDisplay = displays.find(mDisplayId);
+	DisplayMap::iterator thisDisplay = displays.find(mOriginalDisplayId);
 
     if (thisDisplay != displays.end())
     {

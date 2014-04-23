@@ -71,11 +71,12 @@ class Display
     DISALLOW_COPY_AND_ASSIGN(Display);
 
     Display(EGLNativeDisplayType displayId, HDC deviceContext);
-	Display(EGLint type, void* device);
+	Display(EGLint type, void* device, EGLNativeDisplayType originalDisplayId);
 
     bool restoreLostDevice();
 
     EGLNativeDisplayType mDisplayId;
+	EGLNativeDisplayType mOriginalDisplayId;
     const HDC mDc;
 	EGLint mClientDeviceType;
 	void* mClientDevice;
