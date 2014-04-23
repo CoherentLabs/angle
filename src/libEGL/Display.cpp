@@ -67,6 +67,7 @@ Display::Display(EGLNativeDisplayType displayId, HDC deviceContext) : mDc(device
 																	, mClientDevice(nullptr)
 {
     mDisplayId = displayId;
+	mOriginalDisplayId = mDisplayId;
     mRenderer = NULL;
 }
 
