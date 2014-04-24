@@ -43,13 +43,22 @@ static bool checkMappedNameMaxLength(const ShHandle handle, size_t expectedValue
     return (expectedValue == mappedNameMaxLength);
 }
 
+namespace
+{
+	static bool kInitialized = false;
+}
+
 //
 // Driver must call this first, once, before doing any other compiler operations.
 // Subsequent calls to this function are no-op.
 //
 int ShInitialize()
 {
-    static const bool kInitialized = InitProcess();
+	if(!kInitialized)
+	{
+		kInitialized = InitProcess();
+	}
+    
     return kInitialized ? 1 : 0;
 }
 
@@ -59,6 +68,7 @@ int ShInitialize()
 int ShFinalize()
 {
     DetachProcess();
+	kInitialized = false;
     return 1;
 }
 
