@@ -2011,7 +2011,7 @@ void Renderer11::release()
 			mDeviceContext->ClearState();
 			mDeviceContext->Flush();
 		}
-		mDeviceContext->Release();
+        mDeviceContext->Release();
         mDeviceContext = NULL;
     }
 
@@ -2034,10 +2034,14 @@ void Renderer11::release()
     }
 }
 
-bool Renderer11::resetDevice()
+bool Renderer11::resetDevice(bool releaseOnly)
 {
     // recreate everything
     release();
+
+	if (releaseOnly)
+		return false;
+
     EGLint result = initialize();
 
     if (result != EGL_SUCCESS)

@@ -356,12 +356,14 @@ typedef EGLuint64NV (EGLAPIENTRYP PFNEGLGETSYSTEMTIMENVPROC) (void);
 #ifdef EGL_EGLEXT_PROTOTYPES
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplayANGLE(EGLNativeDisplayType displayId, EGLint type, void* device);
 EGLAPI EGLBoolean EGLAPIENTRY eglTryRestoreDeviceANGLE(EGLDisplay display);
+EGLAPI void EGLAPIENTRY eglReleaseAllDeviceResourcesANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglBeginRenderingANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglEndRenderingANGLE(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglForceDisableSharedTexturesANGLE(EGLBoolean disable);
 #else
 typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETDISPLAYANGLE)(EGLDisplay, EGLint, void*);
 typedef EGLBoolean (EGLAPIENTRYP PFNEGLTRYRESTOREDEVICEANGLE)(EGLDisplay display);
+typedef void (EGLAPIENTRYP PFNEGLRELEASEALLDEVICERESOURCESANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLBEGINRENDERINGANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLENDRENDERINGANGLE)(EGLDisplay display);
 typedef void (EGLAPIENTRYP PFNEGLFORCEDISABLESHAREDTEXTURESANGLE)(EGLBoolean disable);

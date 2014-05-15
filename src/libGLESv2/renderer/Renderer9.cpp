@@ -168,7 +168,7 @@ Renderer9::~Renderer9()
         // If the device is lost, reset it first to prevent leaving the driver in an unstable state
         if (testDeviceLost(false))
         {
-            resetDevice();
+            resetDevice(false);
         }
     }
 
@@ -2209,9 +2209,12 @@ bool Renderer9::testDeviceResettable()
     }
 }
 
-bool Renderer9::resetDevice()
+bool Renderer9::resetDevice(bool releaseOnly)
 {
     releaseDeviceResources();
+
+	if (releaseOnly)
+		return false;
 
     D3DPRESENT_PARAMETERS presentParameters = getDefaultPresentParameters();
 
@@ -2279,8 +2282,15 @@ bool Renderer9::resetDevice()
     // If the device was removed, we already finished re-initialization in resetRemovedDevice
     if (!removedDevice)
     {
-        // reset device defaults
-        initializeDevice();
+		if (mClientDevice)
+		{
+			result = mDevice->TestCooperativeLevel();
+		}
+		if (result == D3D_OK)
+		{
+			// reset device defaults
+			initializeDevice();
+		}
     }
 
     mDeviceLost = false;

@@ -56,7 +56,7 @@ egl::Display *Display::getDisplay(EGLNativeDisplayType displayId, EGLint type, v
         return displays[(EGLNativeDisplayType)displayId];
     }
     
-	egl::Display *display = new egl::Display(type, device, displayId);
+    egl::Display *display = new egl::Display(type, device, displayId);
 
     displays[(EGLNativeDisplayType)displayId] = display;
     return display;
@@ -67,25 +67,26 @@ Display::Display(EGLNativeDisplayType displayId, HDC deviceContext) : mDc(device
 																	, mClientDevice(nullptr)
 {
     mDisplayId = displayId;
-	mOriginalDisplayId = mDisplayId;
+    mOriginalDisplayId = mDisplayId;
     mRenderer = NULL;
 }
 
-Display::Display(EGLint type, void* device, EGLNativeDisplayType originalDisplayId)
-	: mClientDeviceType(type)
-	, mClientDevice(device)
-	, mDc(NULL)
-	, mOriginalDisplayId(originalDisplayId)
+Display::Display(
+    EGLint type, void* device, EGLNativeDisplayType originalDisplayId)
+    : mClientDeviceType(type)
+    , mClientDevice(device)
+    , mDc(NULL)
+    , mOriginalDisplayId(originalDisplayId)
 {
-	mDisplayId = (EGLNativeDisplayType)mClientDevice;
-	mRenderer = NULL;
+    mDisplayId = (EGLNativeDisplayType)mClientDevice;
+    mRenderer = NULL;
 }
 
 Display::~Display()
 {
     terminate();
 
-	DisplayMap::iterator thisDisplay = displays.find(mOriginalDisplayId);
+    DisplayMap::iterator thisDisplay = displays.find(mOriginalDisplayId);
 
     if (thisDisplay != displays.end())
     {
@@ -266,7 +267,7 @@ EGLSurface Display::createWindowSurface(HWND window, EGLConfig config, const EGL
 
     if (mRenderer->testDeviceLost(false))
     {
-        if (!restoreLostDevice())
+        if (!restoreLostDevice(false))
             return EGL_NO_SURFACE;
     }
 
@@ -379,7 +380,7 @@ EGLSurface Display::createOffscreenSurface(EGLConfig config, HANDLE shareHandle,
 
     if (mRenderer->testDeviceLost(false))
     {
-        if (!restoreLostDevice())
+        if (!restoreLostDevice(false))
             return EGL_NO_SURFACE;
     }
 
@@ -404,7 +405,7 @@ EGLContext Display::createContext(EGLConfig configHandle, const gl::Context *sha
     }
     else if (mRenderer->testDeviceLost(false))   // Lost device
     {
-        if (!restoreLostDevice())
+        if (!restoreLostDevice(false))
             return NULL;
     }
 
@@ -416,10 +417,15 @@ EGLContext Display::createContext(EGLConfig configHandle, const gl::Context *sha
 
 bool Display::tryRestoreLostDevice()
 {
-	return restoreLostDevice();
+	return restoreLostDevice(false);
 }
 
-bool Display::restoreLostDevice()
+void Display::releaseAllDeviceResources()
+{
+	restoreLostDevice(true);
+}
+
+bool Display::restoreLostDevice(bool onlyRelease)
 {
     for (ContextSet::iterator ctx = mContextSet.begin(); ctx != mContextSet.end(); ctx++)
     {
@@ -433,16 +439,19 @@ bool Display::restoreLostDevice()
         (*surface)->release();
     }
 
-    if (!mRenderer->resetDevice())
+	if (!mRenderer->resetDevice(onlyRelease))
     {
         return error(EGL_BAD_ALLOC, false);
     }
 
-    // Restore any surfaces that may have been lost
-    for (SurfaceSet::iterator surface = mSurfaceSet.begin(); surface != mSurfaceSet.end(); surface++)
-    {
-        (*surface)->resetSwapChain();
-    }
+	if (!onlyRelease)
+	{
+		// Restore any surfaces that may have been lost
+		for (SurfaceSet::iterator surface = mSurfaceSet.begin(); surface != mSurfaceSet.end(); surface++)
+		{
+		    (*surface)->resetSwapChain();
+		}
+	}
 
     return true;
 }

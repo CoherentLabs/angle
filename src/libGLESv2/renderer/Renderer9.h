@@ -39,7 +39,7 @@ class Renderer9 : public Renderer
     static Renderer9 *makeRenderer9(Renderer *renderer);
 
     virtual EGLint initialize();
-    virtual bool resetDevice();
+	virtual bool resetDevice(bool releaseOnly);
 
     virtual int generateConfigs(ConfigDesc **configDescList);
     virtual void deleteConfigs(ConfigDesc *configDescList);

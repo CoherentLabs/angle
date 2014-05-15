@@ -65,18 +65,19 @@ class Display
     const char *getExtensionString() const;
     const char *getVendorString() const;
 
+	void releaseAllDeviceResources();
 	bool tryRestoreLostDevice();
 	static void forceDisableSharedTextures(bool disable);
   private:
     DISALLOW_COPY_AND_ASSIGN(Display);
 
     Display(EGLNativeDisplayType displayId, HDC deviceContext);
-	Display(EGLint type, void* device, EGLNativeDisplayType originalDisplayId);
+    Display(EGLint type, void* device, EGLNativeDisplayType originalDisplayId);
 
-    bool restoreLostDevice();
+    bool restoreLostDevice(bool onlyRelease);
 
     EGLNativeDisplayType mDisplayId;
-	EGLNativeDisplayType mOriginalDisplayId;
+    EGLNativeDisplayType mOriginalDisplayId;
     const HDC mDc;
 	EGLint mClientDeviceType;
 	void* mClientDevice;

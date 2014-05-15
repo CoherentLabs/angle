@@ -153,9 +153,8 @@ EGLBoolean __stdcall eglTerminate(EGLDisplay dpy)
 
         egl::Display *display = static_cast<egl::Display*>(dpy);
 
-		// COHERENT: Delete the display as otherwise it leaks
-		delete display;
-		//display->terminate();
+        // COHERENT: Delete the display as otherwise it leaks
+        delete display;
 
         return egl::success(EGL_TRUE);
     }
@@ -1176,6 +1175,12 @@ EGLDisplay __stdcall eglGetDisplayANGLE(EGLNativeDisplayType displayId, EGLint t
     }
 }
 
+void __stdcall eglReleaseAllDeviceResourcesANGLE(EGLDisplay display)
+{
+	egl::Display *d = static_cast<egl::Display*>(display);
+	return d->releaseAllDeviceResources();
+}
+
 EGLBoolean __stdcall eglTryRestoreDeviceANGLE(EGLDisplay display)
 {
 	egl::Display *d = static_cast<egl::Display*>(display);
@@ -1217,6 +1222,7 @@ __eglMustCastToProperFunctionPointerType __stdcall eglGetProcAddress(const char 
             {"eglPostSubBufferNV", (__eglMustCastToProperFunctionPointerType)eglPostSubBufferNV},
 			{"eglGetDisplayANGLE", (__eglMustCastToProperFunctionPointerType)eglGetDisplayANGLE},
 			{"eglTryRestoreDeviceANGLE", (__eglMustCastToProperFunctionPointerType)eglTryRestoreDeviceANGLE},
+			{"eglReleaseAllDeviceResourcesANGLE", (__eglMustCastToProperFunctionPointerType)eglReleaseAllDeviceResourcesANGLE},
 			{"eglBeginRenderingANGLE", (__eglMustCastToProperFunctionPointerType)eglBeginRenderingANGLE},
 			{"eglEndRenderingANGLE", (__eglMustCastToProperFunctionPointerType)eglEndRenderingANGLE},
 			{"eglForceDisableSharedTexturesANGLE", (__eglMustCastToProperFunctionPointerType)eglForceDisableSharedTexturesANGLE},
