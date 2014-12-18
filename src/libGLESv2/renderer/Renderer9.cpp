@@ -3462,6 +3462,47 @@ void Renderer9::Dx9State::Release()
 	}
 }
 
+void Renderer9::Dx9State::ReleaseRT(IDirect3DBaseTexture9* texture)
+{
+	for (auto i = 0u; i < mRenderTargetsCount; ++i)
+	{
+		if (mRenderTargets[i])
+		{
+			void* container = nullptr;
+			IDirect3DTexture9* RTTexture = nullptr;
+			HRESULT hr = mRenderTargets[i]->GetContainer(IID_IDirect3DTexture9, &container);
+			if (SUCCEEDED(hr) && container)
+			{
+				RTTexture = (IDirect3DTexture9 *)container;
+			}
+			else
+				continue;
+
+			if (RTTexture == texture)
+			{
+				mRenderTargets[i]->Release();
+				mRenderTargets[i] = NULL;
+			}
+			RTTexture->Release();
+		}
+	}
+}
+
+void Renderer9::onTextureDetached(gl::Texture *texture)
+{
+	TextureStorageInterface *texStorage = texture->getNativeTexture();
+	if (texStorage)
+	{
+		TextureStorage9 *storage9 = TextureStorage9::makeTextureStorage9(texStorage->getStorageInstance());
+		auto d3dTexture = storage9->getBaseTexture();
+
+		if (mLocalState)
+		{
+			mLocalState->ReleaseRT(d3dTexture);
+		}
+	}
+}
+
 void Renderer9::beginRendering()
 {
 	if(!mClientDevice)

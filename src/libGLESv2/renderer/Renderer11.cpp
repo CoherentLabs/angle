@@ -3573,6 +3573,9 @@ bool Renderer11::getLUID(LUID *adapterLuid) const
     return true;
 }
 
+void Renderer11::onTextureDetached(gl::Texture *texture)
+{}
+
 void Renderer11::beginRendering()
 {
 	mForeignState.Capture(mDeviceContext);

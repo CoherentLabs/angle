@@ -192,6 +192,7 @@ class Renderer9 : public Renderer
     virtual QueryImpl *createQuery(GLenum type);
     virtual FenceImpl *createFence();
 
+	virtual void onTextureDetached(gl::Texture *texture);
 	virtual void beginRendering();
 	virtual void endRendering();
 
@@ -252,6 +253,8 @@ class Renderer9 : public Renderer
 		void Capture(IDirect3DDevice9* device);
 		void Apply(IDirect3DDevice9* device);
 		void Release();
+
+		void ReleaseRT(IDirect3DBaseTexture9* texture);
 	private:
 		DISALLOW_COPY_AND_ASSIGN(Dx9State);
 		IDirect3DStateBlock9* mState;

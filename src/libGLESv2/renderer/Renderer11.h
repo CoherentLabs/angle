@@ -192,6 +192,7 @@ class Renderer11 : public Renderer
 
     virtual bool getLUID(LUID *adapterLuid) const;
 
+	virtual void onTextureDetached(gl::Texture *texture);
 	virtual void beginRendering();
 	virtual void endRendering();
 

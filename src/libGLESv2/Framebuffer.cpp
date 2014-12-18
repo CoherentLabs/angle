@@ -97,6 +97,10 @@ void Framebuffer::detachTexture(GLuint texture)
         {
             mColorbufferTypes[colorAttachment] = GL_NONE;
             mColorbufferPointers[colorAttachment].set(NULL);
+
+			gl::Context *context = gl::getContext();
+			auto internalTex = context->getTexture(texture);
+			context->getRenderer()->onTextureDetached(internalTex);
         }
     }
 

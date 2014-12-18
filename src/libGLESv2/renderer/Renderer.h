@@ -233,6 +233,9 @@ class Renderer
 
     virtual bool getLUID(LUID *adapterLuid) const = 0;
 
+	// allows to detach a texture from the state saving objects when
+	// it is externally released
+	virtual void onTextureDetached(gl::Texture *texture) = 0;
 	// allow saving/restoring the scope of client devices
 	virtual void beginRendering() = 0;
 	virtual void endRendering() = 0;
