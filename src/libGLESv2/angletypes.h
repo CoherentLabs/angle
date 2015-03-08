@@ -45,6 +45,12 @@ struct Rectangle
 
 struct RasterizerState
 {
+	RasterizerState()
+	{
+		// COHERENT: States are compared with memcmp, but this is
+		// undefined if we don't zero all the memory
+		::memset(this, 0, sizeof(RasterizerState));
+	}
     bool cullFace;
     GLenum cullMode;
     GLenum frontFace;
@@ -59,6 +65,13 @@ struct RasterizerState
 
 struct BlendState
 {
+	BlendState()
+	{
+		// COHERENT: States are compared with memcmp, but this is
+		// undefined if we don't zero all the memory
+		::memset(this, 0, sizeof(BlendState));
+	}
+
     bool blend;
     GLenum sourceBlendRGB;
     GLenum destBlendRGB;
@@ -79,6 +92,12 @@ struct BlendState
 
 struct DepthStencilState
 {
+	DepthStencilState()
+	{
+		// COHERENT: States are compared with memcmp, but this is
+		// undefined if we don't zero all the memory
+		::memset(this, 0, sizeof(DepthStencilState));
+	}
     bool depthTest;
     GLenum depthFunc;
     bool depthMask;
@@ -100,6 +119,12 @@ struct DepthStencilState
 
 struct SamplerState
 {
+	SamplerState()
+	{
+		// COHERENT: States are compared with memcmp, but this is
+		// undefined if we don't zero all the memory
+		::memset(this, 0, sizeof(SamplerState));
+	}
     GLenum minFilter;
     GLenum magFilter;
     GLenum wrapS;
@@ -110,6 +135,10 @@ struct SamplerState
 
 struct ClearParameters
 {
+	ClearParameters()
+	{
+		::memset(this, 0, sizeof(ClearParameters));
+	}
     GLbitfield mask;
 
     Color colorClearValue;
